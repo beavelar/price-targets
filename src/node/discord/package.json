@@ -1,10 +1,8 @@
 {
-  "name": "discord-bot",
+  "name": "discord",
   "version": "1.0.0",
-  "description": "Discord bot implementation",
-  "main": "discord.js",
+  "description": "Discord wrapper implementation",
   "scripts": {
-    "start": "node discord.js",
     "test": "jest"
   },
   "dependencies": {
