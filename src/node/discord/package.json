@@ -5,9 +5,12 @@
   "main": "discord.js",
   "scripts": {
     "start": "node discord.js",
-    "test": "npm test"
+    "test": "jest"
   },
   "dependencies": {
     "discord.js": "^13.6.0"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
   }
 }
