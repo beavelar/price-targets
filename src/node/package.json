@@ -1,0 +1,11 @@
+{
+  "name": "price-targets-node",
+  "version": "1.0.0",
+  "description": "Node implementation of Price Targets services",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
+  }
+}

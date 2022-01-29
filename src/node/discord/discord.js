@@ -2,20 +2,27 @@ const { Client, Intents } = require('discord.js');
 const { Logger } = require('../util/logger/logger.js');
 
 class Discord {
+  /** Logger for Discord */
   _logger = new Logger('discord');
 
-  client = new Client({
+  /** The Discord bot client */
+  _client = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
     partials: ['MESSAGE', 'CHANNEL']
   });
 
   constructor(token) {
-    // Setup handlers
-    this.client.on('ready', this._onReady.bind(this));
-    this.client.on('messageCreate', this._messageCreate.bind(this));
+    if (token) {
+      // Setup handlers
+      this._client.on('ready', this._onReady.bind(this));
+      this._client.on('messageCreate', this._messageCreate.bind(this));
 
-    // Login discord bot utilizing the bot token
-    this.client.login(token);
+      // Login discord bot utilizing the bot token
+      this._client.login(token);
+    }
+    else {
+      this._logger.critical('Discord', 'no toekn provided, Discord bot will not be started');
+    }
   }
 
   /**
@@ -23,7 +30,7 @@ class Discord {
    * is caught
    */
   _onReady() {
-    this._logger.info('onReady', `discord bot is up an running as ${this.client.user.tag}`);
+    this._logger.info('onReady', `discord bot is up an running as ${this._client.user.tag}`);
   }
 
   /**
