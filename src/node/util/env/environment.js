@@ -30,6 +30,7 @@ class Environment {
       const validOption = this._parseOption(key, options[key]);
       if (!validOption) {
         this._logger.critical('parseOptions', 'unable to parse options provided');
+        this.validKeys = false;
         break;
       }
     }
@@ -40,7 +41,13 @@ class Environment {
       case 'float':
         try {
           const result = parseFloat(process.env[option]);
-          this.values.set(option, result);
+          if (isNaN(result)) {
+            this._logger.critical('parseOption', `unable to cast value of ${option} - ${process.env[option]} to float`);
+            return false;
+          }
+          else {
+            this.values.set(option, result);
+          }
         }
         catch {
           this._logger.critical('parseOption', `unable to cast value of ${option} - ${process.env[option]} to float`);
@@ -50,7 +57,13 @@ class Environment {
       case 'int':
         try {
           const result = parseInt(process.env[option]);
-          this.values.set(option, result);
+          if (isNaN(result)) {
+            this._logger.critical('parseOption', `unable to cast value of ${option} - ${process.env[option]} to int`);
+            return false;
+          }
+          else {
+            this.values.set(option, result);
+          }
         }
         catch {
           this._logger.critical('parseOption', `unable to cast value of ${option} - ${process.env[option]} to int`);

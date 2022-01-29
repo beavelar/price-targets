@@ -1,5 +1,11 @@
 const { Environment } = require('./environment.js');
 
+beforeEach(() => {
+  delete process.env.INT_VAR;
+  delete process.env.FLOAT_VAR;
+  delete process.env.STRING_VAR;
+});
+
 test('test Environment no options', () => {
   const env = new Environment({});
   expect(env.values.size).toEqual(0);
@@ -114,8 +120,7 @@ test('test _parseOption valid float', () => {
 
   expect(valid).toEqual(true);
   expect(env.values.size).toEqual(1);
-  expect(env.value.get('FLOAT_VAR')).toEqual(1.2);
-  expect(env.validKeys).toEqual(true);
+  expect(env.values.get('FLOAT_VAR')).toEqual(1.2);
 });
 
 test('test _parseOption invalid float', () => {
@@ -128,7 +133,6 @@ test('test _parseOption invalid float', () => {
 
   expect(valid).toEqual(false);
   expect(env.values.size).toEqual(0);
-  expect(env.validKeys).toEqual(false);
 });
 
 test('test _parseOption valid int', () => {
@@ -142,7 +146,6 @@ test('test _parseOption valid int', () => {
   expect(valid).toEqual(true);
   expect(env.values.size).toEqual(1);
   expect(env.values.get('INT_VAR')).toEqual(1);
-  expect(env.validKeys).toEqual(true);
 });
 
 test('test _parseOption invalid int', () => {
@@ -155,7 +158,6 @@ test('test _parseOption invalid int', () => {
 
   expect(valid).toEqual(false);
   expect(env.values.size).toEqual(0);
-  expect(env.validKeys).toEqual(false);
 });
 
 test('test _parseOption string', () => {
@@ -169,7 +171,6 @@ test('test _parseOption string', () => {
   expect(valid).toEqual(true);
   expect(env.values.size).toEqual(1);
   expect(env.values.get('STRING_VAR')).toEqual('string-value');
-  expect(env.validKeys).toEqual(true);
 });
 
 test('test _parseOption unknown option type', () => {
@@ -182,5 +183,4 @@ test('test _parseOption unknown option type', () => {
 
   expect(valid).toEqual(false);
   expect(env.values.size).toEqual(0);
-  expect(env.validKeys).toEqual(false);
 });
