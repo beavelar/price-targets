@@ -1,3 +1,10 @@
+const LogLevel = {
+  DEBUG: 0,
+  INFO: 1,
+  WARNING: 2,
+  CRITICAL: 3
+};
+
 /**
  * The interface which will be responsible for the application logging
  */
@@ -5,11 +12,16 @@ class Logger {
   /** The filename of the file utilizing the logger */
   _filename = '';
 
+  /** Log level which will control the severity of logs to display */
+  _logLevel = LogLevel.DEBUG;
+
   /**
    * @param {string} filename The filename of the class utilizing the logger
+   * @param {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING | LogLevel.CRITICAL | undefined} logLevel The log level severity to display
    */
-  constructor(filename) {
+  constructor(filename, logLevel) {
     this._filename = filename;
+    this._logLevel = this._getLogLevel(logLevel);
   }
 
   /**
@@ -78,6 +90,28 @@ class Logger {
     const minute = date.getUTCMinutes() < 10 ? `0${date.getUTCMinutes()}` : date.getUTCMinutes();
     const second = date.getUTCSeconds() < 10 ? `0${date.getUTCSeconds()}` : date.getUTCSeconds();
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  }
+
+  /**
+   * Helper function to retrieve the desired log level. We will first check
+   * if the provided log level is a valid log level, if not, we will then
+   * check if a log level was provided in process.env.LOG_LEVEL, if so,
+   * check if valid, if it isn't valid, we will return a default of DEBUG
+   * level.
+   * 
+   * @param {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING | LogLevel.CRITICAL | undefined} logLevel
+   * @returns {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING | LogLevel.CRITICAL}
+   */
+  _getLogLevel(logLevel) {
+    if (logLevel !== undefined || logLevel !== null) {
+      this._log_level = logLevel;
+    }
+    else if (process.env.LOG_LEVEL !== undefined || process.env.LOG_LEVEL !== null || process.env.LOG_LEVEL !== '') {
+      const level = parseInt(process.env.LOG_LEVEL);
+      if (!isNaN(level)) {
+        this._log_level = level;
+      }
+    }
   }
 }
 
