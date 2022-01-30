@@ -1,3 +1,8 @@
+/**
+ * The available log levels that Logger can be configured for. Utilizing
+ * a log level indicates only logs of the selected severity or higher
+ * will be displayed. 
+ */
 const LogLevel = {
   DEBUG: 0,
   INFO: 1,
@@ -17,7 +22,7 @@ class Logger {
 
   /**
    * @param {string} filename The filename of the class utilizing the logger
-   * @param {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING | LogLevel.CRITICAL | undefined} logLevel The log level severity to display
+   * @param {'DEBUG' | 'INFO' | 'WARNING' | 'CRITICAL' | undefined} logLevel The log level severity to display
    */
   constructor(filename, logLevel) {
     this._filename = filename;
@@ -29,10 +34,15 @@ class Logger {
    * 
    * @param {string} funcName The name of the function utilizing the method 
    * @param {string} message The desired message to log
+   * @returns {boolean} Indication of whether the log was display or not
    */
   debug(funcName, message) {
-    const date = this._formatDate(new Date());
-    console.log(`DEBUG: ${date} - ${this._filename}.${funcName} - ${message}`);
+    if (this._logLevel <= LogLevel.DEBUG) {
+      const date = this._formatDate(new Date());
+      console.log(`DEBUG: ${date} - ${this._filename}.${funcName} - ${message}`);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -40,10 +50,15 @@ class Logger {
    * 
    * @param {string} funcName The name of the function utilizing the method 
    * @param {string} message The desired message to log
+   * @returns {boolean} Indication of whether the log was display or not
    */
   info(funcName, message) {
-    const date = this._formatDate(new Date());
-    console.log(`INFO: ${date} - ${this._filename}.${funcName} - ${message}`);
+    if (this._logLevel <= LogLevel.INFO) {
+      const date = this._formatDate(new Date());
+      console.log(`INFO: ${date} - ${this._filename}.${funcName} - ${message}`);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -52,13 +67,18 @@ class Logger {
    * @param {string} funcName The name of the function utilizing the method 
    * @param {string} message The desired message to log
    * @param {Error?} error The error to display after the message
+   * @returns {boolean} Indication of whether the log was display or not
    */
   warning(funcName, message, error) {
-    const date = this._formatDate(new Date());
-    console.log(`WARNING: ${date} - ${this._filename}.${funcName} - ${message}`);
-    if (error) {
-      console.error(error);
+    if (this._logLevel <= LogLevel.WARNING) {
+      const date = this._formatDate(new Date());
+      console.log(`WARNING: ${date} - ${this._filename}.${funcName} - ${message}`);
+      if (error) {
+        console.error(error);
+      }
+      return true;
     }
+    return false;
   }
 
   /**
@@ -67,13 +87,18 @@ class Logger {
    * @param {string} funcName The name of the function utilizing the method 
    * @param {string} message The desired message to log
    * @param {Error?} error The error to display after the message
+   * @returns {boolean} Indication of whether the log was display or not
    */
   critical(funcName, message, error) {
-    const date = this._formatDate(new Date());
-    console.error(`ERROR: ${date} - ${this._filename}.${funcName} - ${message}`);
-    if (error) {
-      console.error(error);
+    if (this._logLevel <= LogLevel.CRITICAL) {
+      const date = this._formatDate(new Date());
+      console.error(`ERROR: ${date} - ${this._filename}.${funcName} - ${message}`);
+      if (error) {
+        console.error(error);
+      }
+      return true;
     }
+    return false;
   }
 
   /**
@@ -99,18 +124,40 @@ class Logger {
    * check if valid, if it isn't valid, we will return a default of DEBUG
    * level.
    * 
-   * @param {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING | LogLevel.CRITICAL | undefined} logLevel
-   * @returns {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING | LogLevel.CRITICAL}
+   * @param {'DEBUG' | 'INFO' | 'WARNING' | 'CRITICAL' |
+   * undefined} logLevel The log level to utilize as a string
+   * @returns {LogLevel.DEBUG | LogLevel.INFO | LogLevel.WARNING |
+   * LogLevel.CRITICAL} The log level to utilize as a LogLevel
    */
   _getLogLevel(logLevel) {
-    if (logLevel !== undefined || logLevel !== null) {
-      this._log_level = logLevel;
+    if (this._validLogLevel(logLevel)) {
+      return LogLevel[logLevel];
     }
-    else if (process.env.LOG_LEVEL !== undefined || process.env.LOG_LEVEL !== null || process.env.LOG_LEVEL !== '') {
-      const level = parseInt(process.env.LOG_LEVEL);
-      if (!isNaN(level)) {
-        this._log_level = level;
-      }
+    else if (this._validLogLevel(process.env.LOG_LEVEL)) {
+      return LogLevel[process.env.LOG_LEVEL];
+    }
+    else {
+      return LogLevel.DEBUG;
+    }
+  }
+
+  /**
+   * Helper function to help determine if the provided log level is valid
+   * or not. We only determine DEBUG, INFO, WARNING, and CRITICAL as valid
+   * at the moment.
+   * 
+   * @param {string | undefined} logLevel The log level to verify 
+   * @returns {boolean} Whether the provided log level is valid or not
+   */
+  _validLogLevel(logLevel) {
+    switch (logLevel) {
+      case 'DEBUG':
+      case 'INFO':
+      case 'WARNING':
+      case 'CRITICAL':
+        return true;
+      default:
+        return false;
     }
   }
 }

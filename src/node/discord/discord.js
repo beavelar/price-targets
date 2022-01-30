@@ -33,7 +33,7 @@ class Discord {
       this._client.on('messageCreate', this._messageCreate.bind(this));
 
       // Login discord bot utilizing the bot token
-      this._logger.info('Discord', 'logging in as Discord bot utilizing token');
+      this._logger.debug('Discord', 'logging in as Discord bot utilizing token');
       this._client.login(token);
     }
     else {
@@ -66,7 +66,7 @@ class Discord {
         this._sendMessage(message.channel, this._helpMessage);
       }
       else {
-        this._logger.info('messageCreate', `unknown command received: ${command}`);
+        this._logger.warning('messageCreate', `unknown command received: ${command}`);
       }
     }
   }
