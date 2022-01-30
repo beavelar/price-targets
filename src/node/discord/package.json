@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Discord wrapper implementation",
   "scripts": {
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "discord.js": "^13.6.0"

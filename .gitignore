@@ -2,5 +2,6 @@
 **/.env
 
 # Node files
+**/coverage
 **/node_modules
 **/package-lock.json

@@ -69,6 +69,21 @@ test('test _parseOptions missing env', () => {
   expect(parsedOptions.size).toEqual(0);
 });
 
+test('test _parseOptions empty env', () => {
+  process.env.INT_VAR = '';
+  process.env.FLOAT_VAR = '';
+  process.env.STRING_VAR = '';
+
+  const env = new Environment({});
+  const parsedOptions = env._parseOptions({
+    "INT_VAR": "int",
+    "FLOAT_VAR": "float",
+    "STRING_VAR": "string"
+  });
+
+  expect(parsedOptions.size).toEqual(0);
+});
+
 test('test _parseOptions valid env', () => {
   process.env.INT_VAR = '1';
   process.env.FLOAT_VAR = '1.2';

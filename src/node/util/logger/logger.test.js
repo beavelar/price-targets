@@ -8,35 +8,35 @@ test('test Logger DEBUG', () => {
   const logger = new Logger('', 'DEBUG');
   expect(logger.debug('', '')).toEqual(true);
   expect(logger.info('', '')).toEqual(true);
-  expect(logger.warning('', '')).toEqual(true);
-  expect(logger.critical('', '')).toEqual(true);
+  expect(logger.warning('', '', new Error())).toEqual(true);
+  expect(logger.critical('', '', new Error())).toEqual(true);
 });
 
 test('test Logger INFO', () => {
   const logger = new Logger('', 'INFO');
   expect(logger.debug('', '')).toEqual(false);
   expect(logger.info('', '')).toEqual(true);
-  expect(logger.warning('', '')).toEqual(true);
-  expect(logger.critical('', '')).toEqual(true);
+  expect(logger.warning('', '', new Error())).toEqual(true);
+  expect(logger.critical('', '', new Error())).toEqual(true);
 });
 
 test('test Logger WARNING', () => {
   const logger = new Logger('', 'WARNING');
   expect(logger.debug('', '')).toEqual(false);
   expect(logger.info('', '')).toEqual(false);
-  expect(logger.warning('', '')).toEqual(true);
-  expect(logger.critical('', '')).toEqual(true);
+  expect(logger.warning('', '', new Error())).toEqual(true);
+  expect(logger.critical('', '', new Error())).toEqual(true);
 });
 
 test('test Logger CRITICAL', () => {
   const logger = new Logger('', 'CRITICAL');
   expect(logger.debug('', '')).toEqual(false);
   expect(logger.info('', '')).toEqual(false);
-  expect(logger.warning('', '')).toEqual(false);
-  expect(logger.critical('', '')).toEqual(true);
+  expect(logger.warning('', '', new Error())).toEqual(false);
+  expect(logger.critical('', '', new Error())).toEqual(true);
 });
 
-test('test formatDate formatting', () => {
+test('test _formatDate formatting', () => {
   const logger = new Logger('');
   expect(logger._formatDate(new Date(Date.UTC(2021)))).toEqual('2021-01-01 00:00:00');
   expect(logger._formatDate(new Date(Date.UTC(2021, 1)))).toEqual('2021-02-01 00:00:00');
@@ -47,7 +47,7 @@ test('test formatDate formatting', () => {
   expect(logger._formatDate(new Date(Date.UTC(2021, 1, 3, 4, 5, 6, 7)))).toEqual('2021-02-03 04:05:06');
 });
 
-test('test getLogLevel valid level', () => {
+test('test _getLogLevel valid level', () => {
   const logger = new Logger('');
   expect(logger._getLogLevel('DEBUG')).toEqual(0);
   expect(logger._getLogLevel('INFO')).toEqual(1);
@@ -55,7 +55,7 @@ test('test getLogLevel valid level', () => {
   expect(logger._getLogLevel('CRITICAL')).toEqual(3);
 });
 
-test('test getLogLevel invalid level', () => {
+test('test _getLogLevel invalid level', () => {
   const logger = new Logger('');
   expect(logger._getLogLevel('invalid')).toEqual(0);
   expect(logger._getLogLevel('log')).toEqual(0);
@@ -65,7 +65,7 @@ test('test getLogLevel invalid level', () => {
   expect(logger._getLogLevel()).toEqual(0);
 });
 
-test('test getLogLevel valid environment level', () => {
+test('test _getLogLevel valid environment level', () => {
   const logger = new Logger('');
 
   process.env.LOG_LEVEL = 'DEBUG';
@@ -81,7 +81,7 @@ test('test getLogLevel valid environment level', () => {
   expect(logger._getLogLevel()).toEqual(3);
 });
 
-test('test getLogLevel invalid environment level', () => {
+test('test _getLogLevel invalid environment level', () => {
   const logger = new Logger('');
 
   process.env.LOG_LEVEL = 'invalid';
@@ -103,7 +103,7 @@ test('test getLogLevel invalid environment level', () => {
   expect(logger._getLogLevel()).toEqual(0);
 });
 
-test('test validLogLevel valid level', () => {
+test('test _validLogLevel valid level', () => {
   const logger = new Logger('');
 
   expect(logger._validLogLevel('DEBUG')).toEqual(true);
@@ -112,7 +112,7 @@ test('test validLogLevel valid level', () => {
   expect(logger._validLogLevel('CRITICAL')).toEqual(true);
 });
 
-test('test validLogLevel invalid level', () => {
+test('test _validLogLevel invalid level', () => {
   const logger = new Logger('');
 
   expect(logger._validLogLevel('invalid')).toEqual(false);

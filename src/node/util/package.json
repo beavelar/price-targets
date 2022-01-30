@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Utilities implementation",
   "scripts": {
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "devDependencies": {
     "jest": "^27.4.7"
