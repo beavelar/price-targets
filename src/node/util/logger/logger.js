@@ -5,6 +5,9 @@ class Logger {
   /** The filename of the file utilizing the logger */
   _filename = '';
 
+  /**
+   * @param {string} filename The filename of the class utilizing the logger
+   */
   constructor(filename) {
     this._filename = filename;
   }
@@ -12,8 +15,8 @@ class Logger {
   /**
    * Debug level log implementation.
    * 
-   * @param funcName The name of the function utilizing the method 
-   * @param message The desired message to log
+   * @param {string} funcName The name of the function utilizing the method 
+   * @param {string} message The desired message to log
    */
   debug(funcName, message) {
     const date = this._formatDate(new Date());
@@ -23,8 +26,8 @@ class Logger {
   /**
    * Info level log implementation.
    * 
-   * @param funcName The name of the function utilizing the method 
-   * @param message The desired message to log
+   * @param {string} funcName The name of the function utilizing the method 
+   * @param {string} message The desired message to log
    */
   info(funcName, message) {
     const date = this._formatDate(new Date());
@@ -34,9 +37,9 @@ class Logger {
   /**
    * Warning level log implementation.
    * 
-   * @param funcName The name of the function utilizing the method 
-   * @param message The desired message to log
-   * @param error The error to display after the message
+   * @param {string} funcName The name of the function utilizing the method 
+   * @param {string} message The desired message to log
+   * @param {Error?} error The error to display after the message
    */
   warning(funcName, message, error) {
     const date = this._formatDate(new Date());
@@ -49,9 +52,9 @@ class Logger {
   /**
    * Critical level log implementation.
    * 
-   * @param funcName The name of the function utilizing the method 
-   * @param message The desired message to log
-   * @param error The error to display after the message
+   * @param {string} funcName The name of the function utilizing the method 
+   * @param {string} message The desired message to log
+   * @param {Error?} error The error to display after the message
    */
   critical(funcName, message, error) {
     const date = this._formatDate(new Date());
@@ -64,8 +67,8 @@ class Logger {
   /**
    * Helper function to format the date displayed in the log line
    * 
-   * @param date The date of the log
-   * @returns The date as a string in YYYY-MM-DD hh:mm:ss form
+   * @param {Date} date The date of the log
+   * @returns {string} The date as a string in YYYY-MM-DD hh:mm:ss form
    */
   _formatDate(date) {
     const year = date.getUTCFullYear();

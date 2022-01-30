@@ -14,6 +14,11 @@ class Environment {
   /** Logger for Environment */
   _logger = new Logger('env');
 
+  /**
+   * @param {{[key: string]: string}} options The provided options to attempt to parse
+   * and to parse to. The key should be the environment variable to attempt to parse
+   * and the value should be the type to attempt to parse to.
+   */
   constructor(options) {
     this.values = this._parseOptions(options);
     if (this.values.size === 0) {
@@ -25,10 +30,10 @@ class Environment {
    * With the provided options, will attempt to retrieve the each desired environment
    * variable from the process environment and parse to the desired option type.
    * 
-   * @param {Object<string, string>} options The provided options to attempt to parse
-   * and to parse to. The key should be the environment variable to attemp to parse
+   * @param {{[key: string]: string}} options The provided options to attempt to parse
+   * and to parse to. The key should be the environment variable to attempt to parse
    * and the value should be the type to attempt to parse to.
-   * @returns A map containing the result. If any of the options are unable to be
+   * @returns {Map<string, string>} A map containing the result. If any of the options are unable to be
    * parsed, the map will be empty.
    */
   _parseOptions(options) {
@@ -53,7 +58,7 @@ class Environment {
    * @param {string} option The environment variable to attempt to parse 
    * @param {string} optionType What to attempt to parse the environment variable to.
    * Valid options are 'float', 'int', and 'string'
-   * @returns The parsed option to the desired type or undefined if invalid
+   * @returns {number | string | undefined} The parsed option to the desired type or undefined if invalid
    */
   _parseOption(option, optionType) {
     let result = undefined;
