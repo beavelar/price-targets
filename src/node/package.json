@@ -4,10 +4,12 @@
   "description": "Implementation of Price Targets services and utilities",
   "scripts": {
     "startBot": "node services/bot/bot.js",
+    "startRatings": "node services/ratings/ratings.js",
     "test": "jest --coverage"
   },
   "dependencies": {
-    "discord.js": "^13.6.0"
+    "discord.js": "^13.6.0",
+    "express": "^4.17.2"
   },
   "devDependencies": {
     "jest": "^27.4.7"

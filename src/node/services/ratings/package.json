@@ -1,0 +1,16 @@
+{
+  "name": "ratings",
+  "version": "1.0.0",
+  "description": "Implementation of the ratings service",
+  "main": "ratings.js",
+  "scripts": {
+    "start": "node ratings.js",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
+  }
+}

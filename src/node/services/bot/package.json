@@ -1,7 +1,7 @@
 {
   "name": "bot",
   "version": "1.0.0",
-  "description": "Bot implementation",
+  "description": "Implementation of the bot service",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
