@@ -1,7 +1,7 @@
 {
-  "name": "util",
+  "name": "env",
   "version": "1.0.0",
-  "description": "Utilities implementation",
+  "description": "Generic configurable environment implementation",
   "scripts": {
     "test": "jest --coverage"
   },
