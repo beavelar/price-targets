@@ -15,7 +15,7 @@ class Environment {
   _logger = new Logger('env');
 
   /**
-   * @param {{[key: string]: string}} options The provided options to attempt to parse
+   * @param {{[key: string]: 'float' | 'int' | 'string'}} options The provided options to attempt to parse
    * and to parse to. The key should be the environment variable to attempt to parse
    * and the value should be the type to attempt to parse to.
    */

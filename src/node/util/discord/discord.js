@@ -1,5 +1,5 @@
 const { Client, Intents, Message, Channel } = require('discord.js');
-const { Logger } = require('../util/logger/logger.js');
+const { Logger } = require('../logger/logger.js');
 
 /**
  * Basic wrapper of the Discord bot client implementation

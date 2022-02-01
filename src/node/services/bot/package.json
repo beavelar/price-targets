@@ -1,8 +1,10 @@
 {
-  "name": "util",
+  "name": "bot",
   "version": "1.0.0",
-  "description": "Utilities implementation",
+  "description": "Implementation of the bot service",
+  "main": "bot.js",
   "scripts": {
+    "start": "node bot.js",
     "test": "jest --coverage"
   },
   "devDependencies": {

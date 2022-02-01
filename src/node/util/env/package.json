@@ -1,10 +1,8 @@
 {
-  "name": "bot",
+  "name": "env",
   "version": "1.0.0",
-  "description": "Bot implementation",
-  "main": "bot.js",
+  "description": "Generic configurable environment implementation",
   "scripts": {
-    "start": "node bot.js",
     "test": "jest --coverage"
   },
   "devDependencies": {
