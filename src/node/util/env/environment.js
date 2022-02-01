@@ -8,11 +8,11 @@ class Environment {
   /** Flag indicating if consumed keys are valid */
   validKeys = true;
 
-  /** Map which will contain the parse environment variables */
-  values = new Map();
-
   /** Logger for Environment */
   _logger = new Logger('env');
+
+  /** Map which will contain the parse environment variables */
+  _values = new Map();
 
   /**
    * @param {{[key: string]: 'float' | 'int' | 'string'}} options The provided options to attempt to parse
@@ -20,10 +20,23 @@ class Environment {
    * and the value should be the type to attempt to parse to.
    */
   constructor(options) {
-    this.values = this._parseOptions(options);
-    if (this.values.size === 0) {
+    this._values = this._parseOptions(options);
+    if (this._values.size === 0) {
       this.validKeys = false;
     }
+  }
+
+  /**
+   * Gets the desired environment variable from the _values map. If a fallback is provided, the
+   * fallback will be utilized if the environment variable does not exist in the map. If the
+   * environment variable doesn't exist and there is no fallback, a undefined will be returned.
+   * 
+   * @param {string} option 
+   * @param {number | string | undefined} fallback 
+   * @returns {number | string | undefined} The environment variable, fallback, or undefined
+   */
+  get(option, fallback) {
+    return this._values.get(option) ? this._values.get(option) : fallback;
   }
 
   /**
