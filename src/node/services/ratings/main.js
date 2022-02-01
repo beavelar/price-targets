@@ -1,6 +1,6 @@
 const { Environment } = require('../../util/env/environment.js');
 const { Logger } = require('../../util/logger/logger.js');
-const { RatingsServer } = require('./server.js');
+const { RatingsServer } = require('./server/server.js');
 
 const env = new Environment({
   'RATINGS_REQUEST_URL': 'string',

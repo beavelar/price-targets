@@ -1,6 +1,6 @@
 const express = require('express');
 const needle = require('needle');
-const { Logger } = require('../../util/logger/logger.js');
+const { Logger } = require('../../../util/logger/logger.js');
 
 /**
  * Wrapper for the rating server
@@ -13,7 +13,9 @@ class RatingsServer {
   _server = express();
 
   constructor(dataUrl) {
-    this._ratingsRoute(dataUrl);
+    if (dataUrl) {
+      this._ratingsRoute(dataUrl);
+    }
   }
 
   /**
@@ -21,6 +23,7 @@ class RatingsServer {
    * 
    * @param {string} port Port to listen on
    */
+  /* istanbul ignore next */
   init(port) {
     this._server.listen(port, () => {
       this._logger.info('init', `server is up and listening on port: ${port}`);
@@ -33,6 +36,7 @@ class RatingsServer {
    * 
    * @param {string} dataUrl The url to request the data from
    */
+  /* istanbul ignore next */
   _ratingsRoute(dataUrl) {
     this._server.get('/ratings/:ticker', (req, res) => {
       const ticker = req.params.ticker.toLocaleLowerCase();
