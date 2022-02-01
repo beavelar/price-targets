@@ -1,5 +1,9 @@
 const { Discord } = require('./discord.js');
 
-test('test', () => {
-  expect(true).toEqual(true);
+describe('Discord test suite', () => {
+  process.env.LOG_LEVEL = 'TESTING';
+
+  test('test', () => {
+    expect(true).toEqual(true);
+  });
 });

@@ -1,13 +1,15 @@
 /**
  * The available log levels that Logger can be configured for. Utilizing
  * a log level indicates only logs of the selected severity or higher
- * will be displayed. 
+ * will be displayed. Setting to TESTING indicates no logs will be displayed.
+ * Should be utilized for testing purposes only.
  */
 const LogLevel = {
   DEBUG: 0,
   INFO: 1,
   WARNING: 2,
-  CRITICAL: 3
+  CRITICAL: 3,
+  TESTING: 4
 };
 
 /**
@@ -82,9 +84,7 @@ class Logger {
   }
 
   /**
-   * Critical level log implementation. This is the most critical log that
-   * can be displayed, as such, it will always get display when called
-   * regardless of the log level set.
+   * Critical level log implementation.
    * 
    * @param {string} funcName The name of the function utilizing the method 
    * @param {string} message The desired message to log
@@ -92,12 +92,15 @@ class Logger {
    * @returns {boolean} Indication of whether the log was display or not
    */
   critical(funcName, message, error) {
-    const date = this._formatDate(new Date());
-    console.error(`ERROR: ${date} - ${this._filename}.${funcName} - ${message}`);
-    if (error) {
-      console.error(error);
+    if (this._logLevel <= LogLevel.CRITICAL) {
+      const date = this._formatDate(new Date());
+      console.error(`ERROR: ${date} - ${this._filename}.${funcName} - ${message}`);
+      if (error) {
+        console.error(error);
+      }
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
@@ -154,6 +157,7 @@ class Logger {
       case 'INFO':
       case 'WARNING':
       case 'CRITICAL':
+      case 'TESTING':
         return true;
       default:
         return false;
