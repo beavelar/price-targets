@@ -82,7 +82,9 @@ class Logger {
   }
 
   /**
-   * Critical level log implementation.
+   * Critical level log implementation. This is the most critical log that
+   * can be displayed, as such, it will always get display when called
+   * regardless of the log level set.
    * 
    * @param {string} funcName The name of the function utilizing the method 
    * @param {string} message The desired message to log
@@ -90,15 +92,12 @@ class Logger {
    * @returns {boolean} Indication of whether the log was display or not
    */
   critical(funcName, message, error) {
-    if (this._logLevel <= LogLevel.CRITICAL) {
-      const date = this._formatDate(new Date());
-      console.error(`ERROR: ${date} - ${this._filename}.${funcName} - ${message}`);
-      if (error) {
-        console.error(error);
-      }
-      return true;
+    const date = this._formatDate(new Date());
+    console.error(`ERROR: ${date} - ${this._filename}.${funcName} - ${message}`);
+    if (error) {
+      console.error(error);
     }
-    return false;
+    return true;
   }
 
   /**
