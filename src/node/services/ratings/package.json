@@ -2,9 +2,9 @@
   "name": "ratings",
   "version": "1.0.0",
   "description": "Implementation of the ratings service",
-  "main": "ratings.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node ratings.js",
+    "start": "node main.js",
     "test": "jest --coverage"
   },
   "dependencies": {

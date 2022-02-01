@@ -8,3 +8,6 @@ const env = new Environment({ DISCORD_BOT_TOKEN: 'string' });
 if (env.validKeys) {
   const discordBot = new Discord(env.values.get('DISCORD_BOT_TOKEN'));
 }
+else {
+  logger.critical('init', 'unable to start up Discord bot');
+}

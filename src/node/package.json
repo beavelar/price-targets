@@ -4,7 +4,7 @@
   "description": "Implementation of Price Targets services and utilities",
   "scripts": {
     "startBot": "node services/bot/bot.js",
-    "startRatings": "node services/ratings/ratings.js",
+    "startRatings": "node services/ratings/main.js",
     "test": "jest --coverage"
   },
   "dependencies": {
