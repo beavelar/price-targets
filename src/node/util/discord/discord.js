@@ -11,14 +11,17 @@ const { Logger } = require('../logger/logger.js');
  * Basic wrapper of the Discord bot client implementation
  */
 class Discord {
+  /** The channel the bot will create and send messages too */
+  _botChannel = 'price-targets';
+
   /** The Discord bot client */
   _client = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
     partials: ['MESSAGE', 'CHANNEL']
   });
 
-  /** The description of the help message to display whenever a help command is received */
-  _helpDescriptionMessage = 'Price Targets bot can be utilized to view price target ' +
+  /** The description of the help/welcome message */
+  _descriptionMessage = 'Price Targets bot can be utilized to view price target ' +
     'updates and current price targets provided by various analysts. Price target ' +
     'updates will get displayed at 7AM MST Monday - Friday';
 
@@ -40,7 +43,24 @@ class Discord {
   });
 
   /** Logger for Discord */
-  _logger = new Logger('discord');
+  _logger = new Logger('Discord');
+
+  /** The welcome message to display */
+  _welcomeMessage = new MessageEmbed({
+    title: 'Welcome!',
+    color: '#00D100',
+    description: this._descriptionMessage,
+    fields: [{
+      name: 'Commands',
+      value: '`pt!rating`, `pt!help`'
+    }, {
+      name: '__pt!rating__',
+      value: 'Request the current lowest, highest, and average price targets provided by various analysts'
+    }, {
+      name: '__pt!help__',
+      value: 'Display the help menu to view all available commands'
+    }]
+  });
 
   /**
    * @param {string} token The string token to utilize to login the Discord bot
@@ -51,7 +71,7 @@ class Discord {
       this._client.on('ready', this._onReady.bind(this));
       this._client.on('messageCreate', this._messageCreate.bind(this));
 
-      // Login discord bot utilizing the bot token
+      // Login Discord bot utilizing the bot token
       this._logger.debug('Discord', 'logging in as Discord bot utilizing token');
       this._client.login(token);
     }
@@ -61,11 +81,22 @@ class Discord {
   }
 
   /**
-   * Client ready handler. We will just log that the bot is up and running when this event
-   * is caught
+   * Helper function to create a desired Discord channel. If a welcome message is provided,
+   * we will send the message in the newly created channel as soon as it's created.
+   * 
+   * @param {Guild} guild The Discord guild to create the channel in
+   * @param {string} channelName The Discord channel to create
+   * @param {string | MessageEmbed | undefined} message The welcome message to send if provided
    */
-  _onReady() {
-    this._logger.info('onReady', `discord bot is up an running as ${this._client.user.tag}`);
+  _createChannel(guild, channelName, welcomeMessage) {
+    guild.channels.create(channelName).then((channel) => {
+      this._logger.debug('createChannel', `successfully created channel ${channelName} for guild ${guild.id}`);
+      if (welcomeMessage) {
+        this._sendMessage(channel, welcomeMessage);
+      }
+    }).catch((err) => {
+      this._logger.warning('creationChannel', `failed to create channel ${channelName}`, err);
+    });
   }
 
   /**
@@ -94,9 +125,23 @@ class Discord {
   }
 
   /**
+   * Client ready handler. When the bot is logged on, we will check if the guild has the
+   * channel that the bot will send updates on, if not, create it with a welcome message.
+   */
+  _onReady() {
+    this._logger.info('onReady', `Discord bot is up an running as ${this._client.user.tag}`);
+    this._client.guilds.cache.forEach((guild) => {
+      const channel = guild.channels.cache.find(channel => channel.name === this._botChannel);
+      if (!channel) {
+        this._createChannel(guild, this._botChannel, this._welcomeMessage);
+      }
+    });
+  }
+
+  /**
    * Helper function to send a desired message to a desired channel
    * 
-   * @param {Channel} channel The discord channel to send the message to
+   * @param {Channel} channel The Discord channel to send the message to
    * @param {string | MessageEmbed} message The desired message to send
    */
   _sendMessage(channel, message) {
