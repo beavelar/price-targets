@@ -31,7 +31,7 @@ class Discord {
   _helpMessage = new MessageEmbed({
     title: 'Help Menu',
     color: '#00D100',
-    description: this._helpDescriptionMessage,
+    description: this._descriptionMessage,
     fields: [{
       name: 'Commands',
       value: '`pt!rating`, `pt!help`'
