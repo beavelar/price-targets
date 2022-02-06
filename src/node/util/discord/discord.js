@@ -1,9 +1,11 @@
 const {
-  Channel,
   Client,
+  Guild,
+  GuildTextBasedChannel,
   Intents,
   Message,
-  MessageEmbed
+  MessageEmbed,
+  TextBasedChannel
 } = require('discord.js');
 const { Logger } = require('../logger/logger.js');
 
@@ -64,8 +66,13 @@ class Discord {
 
   /**
    * @param {string} token The string token to utilize to login the Discord bot
+   * @param {Client} client The client to set if provided. Should be utilized for mock purposes 
    */
-  constructor(token) {
+  constructor(token, client) {
+    // Set the mock client for testing if provided
+    if (client)
+      this._client = client;
+
     if (token) {
       // Setup handlers
       this._client.on('ready', this._onReady.bind(this));
@@ -76,26 +83,48 @@ class Discord {
       this._client.login(token);
     }
     else {
-      this._logger.critical('Discord', 'no toekn provided, Discord bot will not be started');
+      this._logger.critical('Discord', 'no token provided, Discord bot will not be started');
     }
   }
 
   /**
-   * Helper function to create a desired Discord channel. If a welcome message is provided,
-   * we will send the message in the newly created channel as soon as it's created.
+   * Helper function to create a desired Discord channel.
    * 
    * @param {Guild} guild The Discord guild to create the channel in
    * @param {string} channelName The Discord channel to create
-   * @param {string | MessageEmbed | undefined} message The welcome message to send if provided
+   * @returns {Prmose<NonThreadGuildBasedChannel | string>} A promise which will resolve with a Channel
+   * or reject with a message
    */
-  _createChannel(guild, channelName, welcomeMessage) {
-    guild.channels.create(channelName).then((channel) => {
-      this._logger.debug('createChannel', `successfully created channel ${channelName} for guild ${guild.id}`);
-      if (welcomeMessage) {
-        this._sendMessage(channel, welcomeMessage);
-      }
-    }).catch((err) => {
-      this._logger.warning('creationChannel', `failed to create channel ${channelName}`, err);
+  createChannel(guild, channelName) {
+    return new Promise((resolve, reject) => {
+      guild.channels.create(channelName, {}).then((channel) => {
+        this._logger.debug('createChannel', `successfully created channel ${channelName} for guild ${guild.id}`);
+        resolve(channel);
+      }).catch((err) => {
+        this._logger.warning('createChannel', `failed to create channel ${channelName}`, err);
+        reject(err);
+      });
+    });
+  }
+
+  /**
+   * Helper function to send a desired message to a desired channel
+   * 
+   * @param {GuildTextBasedChannel | TextBasedChannel} channel The Discord channel to send the message to
+   * @param {MessageEmbed | string} message The desired message to send
+   * @returns {Promise<Message | string>} A promise which will resolve with a Message
+   * or reject with a message
+   */
+  sendMessage(channel, message) {
+    return new Promise((resolve, reject) => {
+      const msg = typeof message === 'string' ? message : { embeds: [message] };
+      channel.send(msg).then((response) => {
+        this._logger.info('sendMessage', `successfully sent message to ${response.guild.id}`);
+        resolve(response);
+      }).catch((err) => {
+        this._logger.critical('sendMessage', 'error occurred attempting to send message', err);
+        reject(err);
+      });
     });
   }
 
@@ -111,9 +140,14 @@ class Discord {
     if (message.content.startsWith('pt!')) {
       this._logger.debug('messageCreate', 'received pt! trigger');
       const command = message.content.replace('pt!', '').trim();
+
       if (command.startsWith('help')) {
         this._logger.info('messageCreate', 'received help command');
-        this._sendMessage(message.channel, this._helpMessage);
+        this.sendMessage(message.channel, this._helpMessage).then((_) => {
+          this._logger.debug('messageCreate', 'successfully replied to help command');
+        }).catch((err) => {
+          this._logger.debug('messageCreate', 'failed to reply to help command', err);
+        });
       }
       else if (command.startsWith('rating')) {
         this._logger.info('messageCreate', 'received rating command');
@@ -133,23 +167,12 @@ class Discord {
     this._client.guilds.cache.forEach((guild) => {
       const channel = guild.channels.cache.find(channel => channel.name === this._botChannel);
       if (!channel) {
-        this._createChannel(guild, this._botChannel, this._welcomeMessage);
+        this.createChannel(guild, this._botChannel).then((result) => {
+          this.sendMessage(result, this._welcomeMessage);
+        }).catch((err) => {
+          this._logger.warning('onReady', `failed to create channel ${this._botChannel} on ready event`, err);
+        });
       }
-    });
-  }
-
-  /**
-   * Helper function to send a desired message to a desired channel
-   * 
-   * @param {Channel} channel The Discord channel to send the message to
-   * @param {string | MessageEmbed} message The desired message to send
-   */
-  _sendMessage(channel, message) {
-    const msg = typeof message === 'string' ? message : { embeds: [message] };
-    channel.send(msg).then((response) => {
-      this._logger.info('sendMessage', `successfully sent message to ${response.guild.id}`);
-    }).catch((error) => {
-      this._logger.critical('sendMessage', 'error occurred attempting to send message', error);
     });
   }
 }
