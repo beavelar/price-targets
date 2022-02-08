@@ -41,7 +41,7 @@ class Logger {
   debug(funcName, message) {
     if (this._logLevel <= LogLevel.DEBUG) {
       const date = this._formatDate(new Date());
-      console.log(`DEBUG: ${date} - ${this._filename}.${funcName} - ${message}`);
+      console.debug(`DEBUG: ${date} - ${this._filename}.${funcName} - ${message}`);
       return true;
     }
     return false;
@@ -74,9 +74,9 @@ class Logger {
   warning(funcName, message, error) {
     if (this._logLevel <= LogLevel.WARNING) {
       const date = this._formatDate(new Date());
-      console.log(`WARNING: ${date} - ${this._filename}.${funcName} - ${message}`);
+      console.warn(`WARNING: ${date} - ${this._filename}.${funcName} - ${message}`);
       if (error) {
-        console.error(error);
+        console.warn(error);
       }
       return true;
     }
