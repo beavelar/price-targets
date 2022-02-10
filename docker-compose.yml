@@ -1,0 +1,40 @@
+services:
+  bot:
+    build:
+      context: ./src
+      dockerfile: ./docker/bot/Dockerfile.dev
+    command: bash -c "set -xe; npm run startBot"
+    # command: "tail -f /dev/null"
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./src/node/services/bot:/usr/src/services/bot
+      - ./src/node/util/discord:/usr/src/util/discord
+      - ./src/node/util/env:/usr/src/util/env
+      - ./src/node/util/logger:/usr/src/util/logger
+  ratings:
+    build:
+      context: ./src
+      dockerfile: ./docker/ratings/Dockerfile.dev
+    command: bash -c "set -xe; npm run startRatings"
+    # command: "tail -f /dev/null"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - RATINGS_REQUEST_URL=${RATINGS_REQUEST_URL}
+      - RATINGS_SERVER_PORT=${RATINGS_SERVER_PORT}
+      - TICKER_SERVICE_ENDPOINT=${TICKER_SERVICE_ENDPOINT}
+    volumes:
+      - ./src/node/services/ratings:/usr/src/services/ratings
+      - ./src/node/util/env:/usr/src/util/env
+      - ./src/node/util/logger:/usr/src/util/logger
+  ticker:
+    build:
+      context: ./src
+      dockerfile: ./docker/ticker/Dockerfile.dev
+    command: go run ticker.go
+    # command: "tail -f /dev/null"
+    environment:
+      - TICKER_SERVER_PORT=${TICKER_SERVER_PORT}
+    volumes:
+      - ./src/go/ticker:/usr/src/app/ticker

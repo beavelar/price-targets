@@ -1,0 +1,23 @@
+services:
+  bot:
+    build:
+      context: ./src
+      dockerfile: ./docker/bot/Dockerfile
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+  ratings:
+    build:
+      context: ./src
+      dockerfile: ./docker/ratings/Dockerfile
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - RATINGS_REQUEST_URL=${RATINGS_REQUEST_URL}
+      - RATINGS_SERVER_PORT=${RATINGS_SERVER_PORT}
+      - TICKER_SERVICE_ENDPOINT=${TICKER_SERVICE_ENDPOINT}
+  ticker:
+    build:
+      context: ./src
+      dockerfile: ./docker/ticker/Dockerfile
+    environment:
+      - TICKER_SERVER_PORT=${TICKER_SERVER_PORT}
