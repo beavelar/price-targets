@@ -94,5 +94,6 @@ func ticker(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "GET" {
 		res := handleGETRequest(symbol)
 		w.Write(res)
+		return
 	}
 }
