@@ -14,11 +14,33 @@ type Error struct {
 	Error string `json:"error"`
 }
 
-// Response message to respond with for ticker requests
-type TickerResponse struct {
+// Response message to respond with for ticker GET requests
+type GETResponse struct {
 	CompanyName string  `json:"companyName"`
 	Price       float64 `json:"price"`
 	Symbol      string  `json:"symbol"`
+}
+
+// Handle ticker GET request
+func handleGETRequest(symbol string) []byte {
+	log.Println("received ticker request for " + symbol + ", retrieving quote")
+
+	quote, err := quote.Get(symbol)
+	if err != nil {
+		resMsg := "error occurred retrieving quote data for " + symbol + ": " + err.Error()
+		res := marshalErrorResponse(resMsg)
+		return res
+	}
+
+	if quote == nil {
+		resMsg := "no data provided for " + symbol + ", invalid symbol provided"
+		res := marshalErrorResponse(resMsg)
+		return res
+	}
+
+	res := marshalGETResponse(quote.ShortName, quote.RegularMarketPrice, quote.Symbol)
+	log.Println("responding with retrieved quote for " + symbol)
+	return res
 }
 
 // Main handler. Setup and configure HTTP server
@@ -43,10 +65,10 @@ func marshalErrorResponse(msg string) []byte {
 	return bytes
 }
 
-// Marshal ticker response with some logging
-func marshalTickerResponse(name string, price float64, symbol string) []byte {
-	log.Println("marshalling response for ticker request " + symbol)
-	msgObj := &TickerResponse{CompanyName: name, Price: price, Symbol: symbol}
+// Marshal ticker GET response with some logging
+func marshalGETResponse(name string, price float64, symbol string) []byte {
+	log.Println("marshalling GET response for ticker request " + symbol)
+	msgObj := &GETResponse{CompanyName: name, Price: price, Symbol: symbol}
 	bytes, _ := json.Marshal(msgObj)
 	return bytes
 }
@@ -69,24 +91,8 @@ func ticker(w http.ResponseWriter, req *http.Request) {
 	}
 
 	symbol := keys[0]
-	log.Println("received ticker request for " + symbol + ", retrieving quote")
-
-	quote, err := quote.Get(symbol)
-	if err != nil {
-		resMsg := "error occurred retrieving quote data for " + symbol + ": " + err.Error()
-		res := marshalErrorResponse(resMsg)
+	if req.Method == "GET" {
+		res := handleGETRequest(symbol)
 		w.Write(res)
-		return
 	}
-
-	if quote == nil {
-		resMsg := "no data provided for " + symbol + ", invalid symbol provided"
-		res := marshalErrorResponse(resMsg)
-		w.Write(res)
-		return
-	}
-
-	res := marshalTickerResponse(quote.ShortName, quote.RegularMarketPrice, quote.Symbol)
-	log.Println("responding with retrieved quote for " + symbol)
-	w.Write(res)
 }
