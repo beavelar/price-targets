@@ -1,0 +1,11 @@
+FROM golang:1.16-alpine
+
+# Copy and install ratings_history dependencies
+COPY /go/ratings_history/go.mod /usr/src/go.mod
+COPY /go/ratings_history/go.sum /usr/src/go.sum
+RUN set -xe; \
+    cd /usr/src; \
+    go mod download;
+
+WORKDIR /usr/src/app/ratings_history
+CMD [ "go", "run", "ratings_history.go" ]
