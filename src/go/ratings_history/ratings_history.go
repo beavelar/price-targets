@@ -50,7 +50,8 @@ type PostRequest struct {
 
 // Response message to respond with for ratings history POST requests
 type POSTResponse struct {
-	Result string `json:"result"`
+	Success bool   `json:"success"`
+	Symbol  string `json:"symbol"`
 }
 
 // Global service
@@ -65,7 +66,7 @@ func createDBWrapper(collection string, name string, timeout time.Duration, uri 
 	log.Println("Connecting to database: " + uri)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return wrapper, errors.New("unable to connection to database")
+		return wrapper, errors.New(("unable to connect to database: " + err.Error()))
 	}
 	wrapper.client = client
 	wrapper.collection = client.Database(name).Collection(collection)
@@ -124,25 +125,21 @@ func handleGETRequest(symbol string) []byte {
 	var result GETResponse
 	cursor, err := dbWrapper.collection.Find(context.Background(), bson.D{})
 	if err != nil {
-		res := marshalErrorResponse("unable to query ratings_history collection for " + symbol)
-		return res
+		return marshalErrorResponse("unable to query ratings_history collection for " + symbol + ": " + err.Error())
 	}
 	defer cursor.Close(context.Background())
 
 	for cursor.Next(context.Background()) {
-		err := cursor.Decode(&result)
-		if err != nil {
-			log.Fatal(err)
+		if err := cursor.Decode(&result); err != nil {
+			return marshalErrorResponse(("unable to decode db query results: " + err.Error()))
 		}
 	}
 
 	if err := cursor.Err(); err != nil {
-		res := marshalErrorResponse("unable to decode ratings_history query for " + symbol)
-		return res
+		return marshalErrorResponse(("unable to decode ratings_history query for " + symbol + ": " + err.Error()))
 	}
 
-	res := marshalGETResponse(result.Average, result.Highest, result.Lowest, symbol)
-	return res
+	return marshalGETResponse(result.Average, result.Highest, result.Lowest, symbol)
 }
 
 // Handle ticker POST request
@@ -152,13 +149,21 @@ func handlePOSTRequest(body io.ReadCloser, symbol string) []byte {
 	err := decoder.Decode(&reqData)
 
 	if err != nil {
-		resMsg := "unable to decode incoming body from POST request for " + symbol
-		res := marshalErrorResponse(resMsg)
-		return res
+		return marshalErrorResponse(("unable to decode incoming body from POST request for " + symbol + ": " + err.Error()))
 	}
 
-	res := marshalPOSTResponse("some message", "AAPL")
-	return res
+	// opts := options.Update().SetUpsert(true)
+	// filter := bson.D{{}}
+	// insertRes, err := dbWrapper.collection.UpdateOne(context.Background(), bson.M{}, bson.M{symbol: bson.M{"average": reqData.Average, "highest": reqData.Highest, "lowest": reqData.Lowest}})
+	// if err != nil {
+	// 	return marshalErrorResponse(("unable to update database with received POST message for " + symbol + ": " + err.Error()))
+	// }
+
+	// if insertRes.MatchedCount != 0 || insertRes.UpsertedCount != 0 {
+	// 	return marshalPOSTResponse(true, symbol)
+	// }
+
+	return marshalErrorResponse(("unable to update database with received POST message for " + symbol))
 }
 
 // Main handler. Setup and configure HTTP server
@@ -192,9 +197,9 @@ func marshalErrorResponse(msg string) []byte {
 }
 
 // Marshal ratings history POST response with some logging
-func marshalPOSTResponse(msg string, symbol string) []byte {
+func marshalPOSTResponse(success bool, symbol string) []byte {
 	log.Println("marshalling POST response for ratings_history request " + symbol)
-	msgObj := &POSTResponse{Result: msg}
+	msgObj := &POSTResponse{Success: success, Symbol: symbol}
 	bytes, _ := json.Marshal(msgObj)
 	return bytes
 }
