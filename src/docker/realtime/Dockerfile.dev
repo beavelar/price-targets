@@ -1,0 +1,10 @@
+FROM golang:1.16-alpine
+
+# Copy and install realtime dependencies
+COPY /go/realtime/go.mod /usr/src/go.mod
+RUN set -xe; \
+    cd /usr/src; \
+    go mod download;
+
+WORKDIR /usr/src/app/realtime
+CMD [ "go", "run", "realtime.go" ]
