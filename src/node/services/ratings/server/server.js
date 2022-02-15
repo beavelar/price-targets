@@ -15,16 +15,12 @@ class RatingsServer {
   /** The express server instance */
   _server = express();
 
-  /** The URL of the ticker service */
-  _tickerUrl = undefined;
-
-  constructor(dataUrl, tickerUrl) {
+  constructor(dataUrl) {
     this._dataUrl = dataUrl;
-    this._tickerUrl = tickerUrl;
 
     /* istanbul ignore next */
-    if (this._dataUrl && this._tickerUrl) {
-      this._ratingsRoute();
+    if (this._dataUrl) {
+      this._initRatingsRoute();
     }
   }
 
@@ -60,7 +56,8 @@ class RatingsServer {
           if (res.body.analysts && res.body.analysts.ratings) {
             resolve(this._getLowHighAverage(res.body.analysts.ratings));
           }
-          resolve({ average: 0, highest: 0, lowest: 0 });
+          this._logger.critical('dataRequest', 'no analyst ratings return with analyst data request');
+          reject('no analyst ratings return with analyst data request');
         }
       });
     });
@@ -110,52 +107,17 @@ class RatingsServer {
    * route is reached.
    */
   /* istanbul ignore next */
-  _ratingsRoute() {
+  _initRatingsRoute() {
     this._server.get('/ratings/:ticker', (req, res) => {
       const ticker = req.params.ticker.toUpperCase();
       this._logger.debug('GET', `received GET request for ticker ${ticker}`);
 
-      this._tickerRequest(ticker).then((tickerData) => {
-        this._dataRequest(ticker.toLowerCase()).then((ratingData) => {
-          this._logger.debug('GET', `responding with analyst ratings data for ${ticker}`);
-          res.status(200).send({ info: tickerData, rating: ratingData });
-        }).catch((dataErr) => {
-          this._logger.warning('GET', dataErr.error, dataErr.trace);
-          res.status(500).send(tickerErr);
-        });
-      }).catch((tickerErr) => {
-        this._logger.warning('GET', tickerErr.error, tickerErr.trace);
-        res.status(500).send(tickerErr);
-      });
-    });
-  }
-
-  /**
-   * Helper function to request data from the ticker service.
-   * 
-   * @param {string} ticker The ticker to request data for from the ticker service
-   * @returns {Promise<{error: string} | {companyName: string, price: number, symbol: string}>} A promise which
-   * will resolve/reject to the response/error from the ticker service
-   */
-  /* istanbul ignore next */
-  _tickerRequest(ticker) {
-    return new Promise((resolve, reject) => {
-      needle.get(`${this._tickerUrl}?symbol=${ticker}`, (err, res) => {
-        if (err) {
-          this._logger.critical('tickerRequest', 'error occurred attempting to reach ticker service', err);
-          reject({ error: 'error occurred attempting to reach ticker service', trace: err });
-        }
-        else {
-          const response = JSON.parse(res.body);
-          if (response.error) {
-            this._logger.warning('tickerRequest', `invalid ticker provided (${ticker}), unable to retrieve data`, response.error);
-            reject({ error: `invalid ticker provided (${ticker}), unable to retrieve data`, trace: response.error });
-          }
-          else {
-            this._logger.debug('tickerRequest', `successfully received ticker data for ${ticker}`);
-            resolve(response);
-          }
-        }
+      this._dataRequest(ticker.toLowerCase()).then((res) => {
+        this._logger.debug('GET', `responding with analyst ratings data for ${ticker}`);
+        res.status(200).send({ data: res });
+      }).catch((err) => {
+        this._logger.warning('GET', err.error, err.trace);
+        res.status(500).send(err);
       });
     });
   }
