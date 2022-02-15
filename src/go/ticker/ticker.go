@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -9,16 +10,35 @@ import (
 	"github.com/piquette/finance-go/quote"
 )
 
+// Message which will contain environment variables
+type Environment struct {
+	port string
+}
+
 // Error message to return if an error occurred during response building
 type Error struct {
 	Error string `json:"error"`
 }
 
 // Response message to respond with for ticker GET requests
-type GETResponse struct {
+type Ticker struct {
 	CompanyName string  `json:"companyName"`
 	Price       float64 `json:"price"`
 	Symbol      string  `json:"symbol"`
+}
+
+// Get the desired environment variables
+func getEnv() (Environment, error) {
+	var env Environment
+	port := os.Getenv("TICKER_SERVER_PORT")
+
+	// Check if TICKER_SERVER_PORT is valid
+	if len(port) == 0 {
+		return env, errors.New("no value provided for environment variable TICKER_SERVER_PORT")
+	}
+	env.port = port
+
+	return env, nil
 }
 
 // Handle ticker GET request
@@ -45,16 +65,16 @@ func handleGETRequest(symbol string) []byte {
 
 // Main handler. Setup and configure HTTP server
 func main() {
-	port := os.Getenv("TICKER_SERVER_PORT")
-
-	if len(port) == 0 {
-		log.Println("no value provided for environment variable TICKER_SERVER_PORT, exiting...")
+	env, err := getEnv()
+	if err != nil {
+		log.Println(err)
+		log.Println("exiting...")
 		return
 	}
 
-	log.Println("setting up and starting ticker server on port " + port)
+	log.Println("setting up and starting ticker server on port " + env.port)
 	http.HandleFunc("/ticker", ticker)
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":"+env.port, nil)
 }
 
 // Marshal error response with some logging
@@ -68,7 +88,7 @@ func marshalErrorResponse(msg string) []byte {
 // Marshal ticker GET response with some logging
 func marshalGETResponse(name string, price float64, symbol string) []byte {
 	log.Println("marshalling GET response for ticker request " + symbol)
-	msgObj := &GETResponse{CompanyName: name, Price: price, Symbol: symbol}
+	msgObj := &Ticker{CompanyName: name, Price: price, Symbol: symbol}
 	bytes, _ := json.Marshal(msgObj)
 	return bytes
 }
