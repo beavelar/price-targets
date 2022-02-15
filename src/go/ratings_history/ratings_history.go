@@ -113,7 +113,7 @@ func getEnv() (Environment, error) {
 	return env, nil
 }
 
-// Handle ticker GET request
+// Handle ratings history GET request
 func handleGETRequest(symbol string) []byte {
 	var result Rating
 	err := dbWrapper.collection.FindOne(context.Background(), bson.D{{"symbol", symbol}}).Decode(&result)
@@ -124,7 +124,7 @@ func handleGETRequest(symbol string) []byte {
 	return marshalGETResponse(result.Average, result.Highest, result.Lowest, symbol)
 }
 
-// Handle ticker POST request
+// Handle ratings history POST request
 func handlePOSTRequest(body io.ReadCloser, symbol string) []byte {
 	decoder := json.NewDecoder(body)
 	var reqData Rating
