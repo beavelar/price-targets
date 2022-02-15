@@ -6,18 +6,35 @@ services:
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - database:/data/db
   ratings:
     build:
       context: ./src
       dockerfile: ./docker/ratings/Dockerfile
     environment:
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - RATINGS_REQUEST_URL=${RATINGS_REQUEST_URL}
       - RATINGS_SERVER_PORT=${RATINGS_SERVER_PORT}
       - TICKER_SERVICE_ENDPOINT=${TICKER_SERVICE_ENDPOINT}
+  ratings_history:
+    build:
+      context: ./src
+      dockerfile: ./docker/ratings_history/Dockerfile
+    depends_on:
+      - "mongodb"
+    environment:
+      - DATABASE_COLLECTION_NAME=${DATABASE_COLLECTION_NAME}
+      - DATABASE_CONNECT_TIMEOUT=${DATABASE_CONNECT_TIMEOUT}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_URI=${DATABASE_URI}
+      - RATINGS_HISTORY_SERVER_PORT=${RATINGS_HISTORY_SERVER_PORT}
   ticker:
     build:
       context: ./src
       dockerfile: ./docker/ticker/Dockerfile
     environment:
       - TICKER_SERVER_PORT=${TICKER_SERVER_PORT}
+volumes:
+  database: {}
