@@ -34,15 +34,8 @@ type Error struct {
 	Error string `json:"error"`
 }
 
-// Response message to respond with for ratings history GET requests
-type GETResponse struct {
-	Average float64 `json:"average", bson:"average"`
-	Highest float64 `json:"highest", bson:"highest"`
-	Lowest  float64 `json:"lowest", bson:"lowest"`
-}
-
-// Request message for valid incoming POST requests
-type PostRequest struct {
+// Rating structure to respond with and accept for GET and POST request
+type Rating struct {
 	Average float64 `json:"average"`
 	Highest float64 `json:"highest"`
 	Lowest  float64 `json:"lowest"`
@@ -122,21 +115,10 @@ func getEnv() (Environment, error) {
 
 // Handle ticker GET request
 func handleGETRequest(symbol string) []byte {
-	var result GETResponse
-	cursor, err := dbWrapper.collection.Find(context.Background(), bson.D{})
+	var result Rating
+	err := dbWrapper.collection.FindOne(context.Background(), bson.D{{"symbol", symbol}}).Decode(&result)
 	if err != nil {
-		return marshalErrorResponse("unable to query ratings_history collection for " + symbol + ": " + err.Error())
-	}
-	defer cursor.Close(context.Background())
-
-	for cursor.Next(context.Background()) {
-		if err := cursor.Decode(&result); err != nil {
-			return marshalErrorResponse(("unable to decode db query results: " + err.Error()))
-		}
-	}
-
-	if err := cursor.Err(); err != nil {
-		return marshalErrorResponse(("unable to decode ratings_history query for " + symbol + ": " + err.Error()))
+		return marshalErrorResponse("error occurred querying ratings_history for " + symbol + ": " + err.Error())
 	}
 
 	return marshalGETResponse(result.Average, result.Highest, result.Lowest, symbol)
@@ -145,23 +127,25 @@ func handleGETRequest(symbol string) []byte {
 // Handle ticker POST request
 func handlePOSTRequest(body io.ReadCloser, symbol string) []byte {
 	decoder := json.NewDecoder(body)
-	var reqData GETResponse
+	var reqData Rating
 	err := decoder.Decode(&reqData)
 
 	if err != nil {
 		return marshalErrorResponse(("unable to decode incoming body from POST request for " + symbol + ": " + err.Error()))
 	}
 
-	// opts := options.Update().SetUpsert(true)
-	// filter := bson.D{{}}
-	// insertRes, err := dbWrapper.collection.UpdateOne(context.Background(), bson.M{}, bson.M{symbol: bson.M{"average": reqData.Average, "highest": reqData.Highest, "lowest": reqData.Lowest}})
-	// if err != nil {
-	// 	return marshalErrorResponse(("unable to update database with received POST message for " + symbol + ": " + err.Error()))
-	// }
+	opts := options.Update().SetUpsert(true)
+	filter := bson.D{{"symbol", symbol}}
+	data := bson.M{"average": reqData.Average, "highest": reqData.Highest, "lowest": reqData.Lowest, "symbol": symbol}
+	update := bson.D{{"$set", data}}
+	insertRes, err := dbWrapper.collection.UpdateOne(context.TODO(), filter, update, opts)
+	if err != nil {
+		return marshalErrorResponse(("unable to update database with received POST message for " + symbol + ": " + err.Error()))
+	}
 
-	// if insertRes.MatchedCount != 0 || insertRes.UpsertedCount != 0 {
-	// 	return marshalPOSTResponse(true, symbol)
-	// }
+	if insertRes.MatchedCount != 0 || insertRes.UpsertedCount != 0 {
+		return marshalPOSTResponse(true, symbol)
+	}
 
 	return marshalErrorResponse(("unable to update database with received POST message for " + symbol))
 }
@@ -207,7 +191,7 @@ func marshalPOSTResponse(success bool, symbol string) []byte {
 // Marshal ratings history GET response with some logging
 func marshalGETResponse(average float64, highest float64, lowest float64, symbol string) []byte {
 	log.Println("marshalling GET response for ratings_history request " + symbol)
-	msgObj := &GETResponse{Average: average, Highest: highest, Lowest: lowest}
+	msgObj := &Rating{Average: average, Highest: highest, Lowest: lowest}
 	bytes, _ := json.Marshal(msgObj)
 	return bytes
 }
