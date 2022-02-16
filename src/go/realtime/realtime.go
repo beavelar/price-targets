@@ -21,6 +21,31 @@ type Error struct {
 	Error string `json:"error"`
 }
 
+// Rating message received from ratings and ratings_history services GET request
+// TODO: Figure out how to make a common dir for this struct
+type Rating struct {
+	Average float64 `json:"average"`
+	Highest float64 `json:"highest"`
+	Lowest  float64 `json:"lowest"`
+}
+
+// Realtime message to repond with for GET requests
+type Realtime struct {
+	Rating        Rating `json:"rating"`
+	RatingHistory Rating `json:"rating_history"`
+	Ticker        Ticker `json:"ticker"`
+}
+
+// Ticker message received from ticker service GET request
+// TODO: Figure out how to make a common dir for this struct
+type Ticker struct {
+	CompanyName string  `json:"companyName"`
+	Price       float64 `json:"price"`
+	Symbol      string  `json:"symbol"`
+}
+
+var myEnv Environment
+
 // Get the desired environment variables
 func getEnv() (Environment, error) {
 	var env Environment
@@ -59,8 +84,39 @@ func getEnv() (Environment, error) {
 // Handle realtime GET request
 func handleGETRequest(symbol string) []byte {
 	log.Println("received realtime request for " + symbol + ", retrieving data")
-	var response []byte
-	return response
+	symbolParam := "?symbol=" + symbol
+
+	var rating Rating
+	ratingsRes, err := http.Get(myEnv.ratingsUri + "/" + symbol)
+	if err != nil {
+		return marshalErrorResponse("error occured requesting data from ratings service")
+	}
+
+	if err = json.NewDecoder(ratingsRes.Body).Decode(&rating); err != nil {
+		return marshalErrorResponse("error occured decoding response from ratings service")
+	}
+
+	var ratingHistory Rating
+	ratingsHistoryRes, err := http.Get(myEnv.ratingsHistoryUri + symbolParam)
+	if err != nil {
+		return marshalErrorResponse("error occured requesting data from ratings_history service")
+	}
+
+	if err = json.NewDecoder(ratingsHistoryRes.Body).Decode(&ratingHistory); err != nil {
+		return marshalErrorResponse("error occured decoding response from ratings_history service")
+	}
+
+	var ticker Ticker
+	tickerRes, err := http.Get(myEnv.tickerUri + symbolParam)
+	if err != nil {
+		return marshalErrorResponse("error occured requesting data from ticker service")
+	}
+
+	if err = json.NewDecoder(tickerRes.Body).Decode(&ticker); err != nil {
+		return marshalErrorResponse("error occured decoding response from ticker service")
+	}
+
+	return marshalGETResponse(rating, ratingHistory, symbol, ticker)
 }
 
 // Main handler. Setup and configure HTTP server
@@ -71,6 +127,7 @@ func main() {
 		log.Println("exiting...")
 		return
 	}
+	myEnv = env
 
 	log.Println("setting up and starting realtime server on port " + env.port)
 	http.HandleFunc("/realtime", realtime)
@@ -81,6 +138,14 @@ func main() {
 func marshalErrorResponse(msg string) []byte {
 	log.Println(msg)
 	msgObj := &Error{Error: msg}
+	bytes, _ := json.Marshal(msgObj)
+	return bytes
+}
+
+// Marshal ticker GET response with some logging
+func marshalGETResponse(rating Rating, ratingHistory Rating, symbol string, ticker Ticker) []byte {
+	log.Println("marshalling GET response for ticker request " + symbol)
+	msgObj := &Realtime{Rating: rating, RatingHistory: ratingHistory, Ticker: ticker}
 	bytes, _ := json.Marshal(msgObj)
 	return bytes
 }
