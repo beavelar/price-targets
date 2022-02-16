@@ -199,16 +199,14 @@ func marshalGETResponse(average float64, highest float64, lowest float64, symbol
 // Ratings history HTTP route
 func ratings_history(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" && req.Method != "POST" {
-		resMsg := "unsupported method received (" + req.Method + "), ignoring request"
-		res := marshalErrorResponse(resMsg)
+		res := marshalErrorResponse("unsupported method received (" + req.Method + "), ignoring request")
 		w.Write(res)
 		return
 	}
 
 	keys, ok := req.URL.Query()["symbol"]
 	if !ok || len(keys[0]) < 1 {
-		resMsg := "received ratings_history request with no symbol parameter, ignoring request"
-		res := marshalErrorResponse(resMsg)
+		res := marshalErrorResponse("received ratings_history request with no symbol parameter, ignoring request")
 		w.Write(res)
 		return
 	}

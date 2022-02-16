@@ -49,7 +49,7 @@ class RatingsServer {
       needle.get(`${this._dataUrl}/${ticker.toLowerCase()}/payload.json`, (err, res) => {
         if (err) {
           this._logger.critical('dataRequest', 'error occurred attempting to retrieve ratings', err);
-          reject('error occurred attempting to retrieve ratings');
+          reject(`error occurred attempting to retrieve ratings: ${err}`);
         }
         else {
           this._logger.debug('dataRequest', `successfully retrieved ratings data for ${ticker}`);

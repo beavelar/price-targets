@@ -89,31 +89,31 @@ func handleGETRequest(symbol string) []byte {
 	var rating Rating
 	ratingsRes, err := http.Get(myEnv.ratingsUri + "/" + symbol)
 	if err != nil {
-		return marshalErrorResponse("error occured requesting data from ratings service")
+		return marshalErrorResponse("error occured requesting data from ratings service: " + err.Error())
 	}
 
 	if err = json.NewDecoder(ratingsRes.Body).Decode(&rating); err != nil {
-		return marshalErrorResponse("error occured decoding response from ratings service")
+		return marshalErrorResponse("error occured decoding response from ratings service: " + err.Error())
 	}
 
 	var ratingHistory Rating
 	ratingsHistoryRes, err := http.Get(myEnv.ratingsHistoryUri + symbolParam)
 	if err != nil {
-		return marshalErrorResponse("error occured requesting data from ratings_history service")
+		return marshalErrorResponse("error occured requesting data from ratings_history service: " + err.Error())
 	}
 
 	if err = json.NewDecoder(ratingsHistoryRes.Body).Decode(&ratingHistory); err != nil {
-		return marshalErrorResponse("error occured decoding response from ratings_history service")
+		return marshalErrorResponse("error occured decoding response from ratings_history service: " + err.Error())
 	}
 
 	var ticker Ticker
 	tickerRes, err := http.Get(myEnv.tickerUri + symbolParam)
 	if err != nil {
-		return marshalErrorResponse("error occured requesting data from ticker service")
+		return marshalErrorResponse("error occured requesting data from ticker service: " + err.Error())
 	}
 
 	if err = json.NewDecoder(tickerRes.Body).Decode(&ticker); err != nil {
-		return marshalErrorResponse("error occured decoding response from ticker service")
+		return marshalErrorResponse("error occured decoding response from ticker service: " + err.Error())
 	}
 
 	return marshalGETResponse(rating, ratingHistory, symbol, ticker)
@@ -153,16 +153,14 @@ func marshalGETResponse(rating Rating, ratingHistory Rating, symbol string, tick
 // Realtime HTTP route
 func realtime(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
-		resMsg := "unsupported method received (" + req.Method + "), ignoring request"
-		res := marshalErrorResponse(resMsg)
+		res := marshalErrorResponse("unsupported method received (" + req.Method + "), ignoring request")
 		w.Write(res)
 		return
 	}
 
 	keys, ok := req.URL.Query()["symbol"]
 	if !ok || len(keys[0]) < 1 {
-		resMsg := "received realtime request with no symbol parameter, ignoring request"
-		res := marshalErrorResponse(resMsg)
+		res := marshalErrorResponse("unsupported method received (" + req.Method + "), ignoring request")
 		w.Write(res)
 		return
 	}
