@@ -26,7 +26,6 @@ services:
     environment:
       - RATINGS_REQUEST_URL=${RATINGS_REQUEST_URL}
       - RATINGS_SERVER_PORT=${RATINGS_SERVER_PORT}
-      - TICKER_SERVICE_ENDPOINT=${TICKER_SERVICE_ENDPOINT}
     volumes:
       - ./src/node/services/ratings:/usr/src/services/ratings
       - ./src/node/util/env:/usr/src/util/env
@@ -47,6 +46,19 @@ services:
       - RATINGS_HISTORY_SERVER_PORT=${RATINGS_HISTORY_SERVER_PORT}
     volumes:
       - ./src/go/ratings_history:/usr/src/app/ratings_history
+  realtime:
+    build:
+      context: ./src
+      dockerfile: ./docker/realtime/Dockerfile.dev
+    command: go run realtime.go
+    # command: "tail -f /dev/null"
+    environment:
+      - RATINGS_SERVICE_URI=${RATINGS_SERVICE_URI}
+      - RATINGS_HISTORY_SERVICE_URI=${RATINGS_HISTORY_SERVICE_URI}
+      - REALTIME_SERVER_PORT=${REALTIME_SERVER_PORT}
+      - TICKER_SERVICE_URI=${TICKER_SERVICE_URI}
+    volumes:
+      - ./src/go/realtime:/usr/src/app/realtime
   ticker:
     build:
       context: ./src

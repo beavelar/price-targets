@@ -17,7 +17,6 @@ services:
     environment:
       - RATINGS_REQUEST_URL=${RATINGS_REQUEST_URL}
       - RATINGS_SERVER_PORT=${RATINGS_SERVER_PORT}
-      - TICKER_SERVICE_ENDPOINT=${TICKER_SERVICE_ENDPOINT}
   ratings_history:
     build:
       context: ./src
@@ -30,6 +29,15 @@ services:
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_URI=${DATABASE_URI}
       - RATINGS_HISTORY_SERVER_PORT=${RATINGS_HISTORY_SERVER_PORT}
+  realtime:
+    build:
+      context: ./src
+      dockerfile: ./docker/realtime/Dockerfile
+    environment:
+      - RATINGS_SERVICE_URI=${RATINGS_SERVICE_URI}
+      - RATINGS_HISTORY_SERVICE_URI=${RATINGS_HISTORY_SERVICE_URI}
+      - REALTIME_SERVER_PORT=${REALTIME_SERVER_PORT}
+      - TICKER_SERVICE_URI=${TICKER_SERVICE_URI}
   ticker:
     build:
       context: ./src

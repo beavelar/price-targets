@@ -47,15 +47,11 @@ func handleGETRequest(symbol string) []byte {
 
 	quote, err := quote.Get(symbol)
 	if err != nil {
-		resMsg := "error occurred retrieving quote data for " + symbol + ": " + err.Error()
-		res := marshalErrorResponse(resMsg)
-		return res
+		return marshalErrorResponse("error occurred retrieving quote data for " + symbol + ": " + err.Error())
 	}
 
 	if quote == nil {
-		resMsg := "no data provided for " + symbol + ", invalid symbol provided"
-		res := marshalErrorResponse(resMsg)
-		return res
+		return marshalErrorResponse("no data provided for " + symbol + ", invalid symbol provided")
 	}
 
 	res := marshalGETResponse(quote.ShortName, quote.RegularMarketPrice, quote.Symbol)
@@ -96,16 +92,14 @@ func marshalGETResponse(name string, price float64, symbol string) []byte {
 // Ticker HTTP route
 func ticker(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
-		resMsg := "unsupported method received (" + req.Method + "), ignoring request"
-		res := marshalErrorResponse(resMsg)
+		res := marshalErrorResponse("unsupported method received (" + req.Method + "), ignoring request")
 		w.Write(res)
 		return
 	}
 
 	keys, ok := req.URL.Query()["symbol"]
 	if !ok || len(keys[0]) < 1 {
-		resMsg := "received ticker request with no symbol parameter, ignoring request"
-		res := marshalErrorResponse(resMsg)
+		res := marshalErrorResponse("received ticker request with no symbol parameter, ignoring request")
 		w.Write(res)
 		return
 	}
