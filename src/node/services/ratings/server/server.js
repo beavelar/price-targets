@@ -40,8 +40,8 @@ class RatingsServer {
    * Helper function to request data from the analyst data api.
    * 
    * @param {string} ticker The ticker to request data for from the ticker service
-   * @returns {Promise<{error: string} | {average: number, highest: number, lowest: number}>} A promise
-   * which will resolve to the parse data from the data retrieved or reject with a message
+   * @returns {Promise<{average: number, highest: number, lowest: number} | string>} A promise
+   * which will resolve to the parsed data from the data retrieved or reject with a string message
    */
   /* istanbul ignore next */
   _dataRequest(ticker) {
@@ -49,15 +49,17 @@ class RatingsServer {
       needle.get(`${this._dataUrl}/${ticker.toLowerCase()}/payload.json`, (err, res) => {
         if (err) {
           this._logger.critical('dataRequest', 'error occurred attempting to retrieve ratings', err);
-          reject({ error: 'error occurred attempting to retrieve ratings', trace: err });
+          reject('error occurred attempting to retrieve ratings');
         }
         else {
           this._logger.debug('dataRequest', `successfully retrieved ratings data for ${ticker}`);
           if (res.body.analysts && res.body.analysts.ratings) {
             resolve(this._getLowHighAverage(res.body.analysts.ratings));
           }
-          this._logger.critical('dataRequest', 'no analyst ratings return with analyst data request');
-          reject('no analyst ratings return with analyst data request');
+          else {
+            this._logger.critical('dataRequest', 'no analyst ratings return with analyst data request');
+            reject('no analyst ratings return with analyst data request');
+          }
         }
       });
     });
@@ -112,11 +114,11 @@ class RatingsServer {
       const ticker = req.params.ticker.toUpperCase();
       this._logger.debug('GET', `received GET request for ticker ${ticker}`);
 
-      this._dataRequest(ticker.toLowerCase()).then((res) => {
+      this._dataRequest(ticker.toLowerCase()).then((ratingData) => {
         this._logger.debug('GET', `responding with analyst ratings data for ${ticker}`);
-        res.status(200).send({ data: res });
+        res.status(200).send({ data: ratingData });
       }).catch((err) => {
-        this._logger.warning('GET', err.error, err.trace);
+        this._logger.warning('GET', err);
         res.status(500).send(err);
       });
     });
