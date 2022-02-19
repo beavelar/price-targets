@@ -7,7 +7,7 @@ const { Logger } = require('../../../util/logger/logger.js');
  */
 class RatingsServer {
   /** The URL of the data provider */
-  _dataUrl = undefined;
+  _dataUrl;
 
   /** Logger for RatingsServer */
   _logger = new Logger('RatingsServer');
@@ -57,8 +57,8 @@ class RatingsServer {
             resolve(this._getLowHighAverage(res.body.analysts.ratings));
           }
           else {
-            this._logger.critical('dataRequest', 'no analyst ratings return with analyst data request');
-            reject('no analyst ratings return with analyst data request');
+            this._logger.critical('dataRequest', 'no analyst ratings returned from analyst data request');
+            reject('no analyst ratings returned from analyst data request');
           }
         }
       });
@@ -75,8 +75,8 @@ class RatingsServer {
    */
   _getLowHighAverage(ratings) {
     this._logger.debug('getLowHighAverage', 'retrieving low, high, and average value of the ratings');
-    let lowest = undefined;
-    let highest = undefined;
+    let lowest;
+    let highest;
     let total = 0;
     let count = 0;
 
@@ -98,7 +98,7 @@ class RatingsServer {
     }
 
     return {
-      average: total / (count !== 0 ? count : 1),
+      average: parseFloat((total / (count !== 0 ? count : 1)).toFixed(2)),
       highest,
       lowest
     };
@@ -116,7 +116,7 @@ class RatingsServer {
 
       this._dataRequest(ticker.toLowerCase()).then((ratingData) => {
         this._logger.debug('GET', `responding with analyst ratings data for ${ticker}`);
-        res.status(200).send({ data: ratingData });
+        res.status(200).send(ratingData);
       }).catch((err) => {
         this._logger.warning('GET', err);
         res.status(500).send(err);

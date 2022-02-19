@@ -1,5 +1,6 @@
 const {
   Client,
+  EmbedFieldData,
   Guild,
   GuildTextBasedChannel,
   Intents,
@@ -8,6 +9,7 @@ const {
   TextBasedChannel
 } = require('discord.js');
 const { Logger } = require('../logger/logger.js');
+const needle = require('needle');
 
 /**
  * Basic wrapper of the Discord bot client implementation
@@ -23,52 +25,52 @@ class Discord {
   });
 
   /** The description of the help/welcome message */
-  _descriptionMessage = 'Price Targets bot can be utilized to view price target ' +
+  _descMsg = 'Price Targets bot can be utilized to view price target ' +
     'updates and current price targets provided by various analysts. Price target ' +
     'updates will get displayed at 7AM MST Monday - Friday';
 
+  /** The message fields of the help/welcome message */
+  _msgFields = [{
+    name: 'Commands',
+    value: '`pt!rating`, `pt!help`'
+  }, {
+    name: '__pt!rating__',
+    value: 'Request the current lowest, highest, and average price targets provided by various analysts'
+  }, {
+    name: '__pt!help__',
+    value: 'Display the help menu to view all available commands'
+  }];
+
   /** The message to display whenever a help command is received */
-  _helpMessage = new MessageEmbed({
-    title: 'Help Menu',
-    color: '#00D100',
-    description: this._descriptionMessage,
-    fields: [{
-      name: 'Commands',
-      value: '`pt!rating`, `pt!help`'
-    }, {
-      name: '__pt!rating__',
-      value: 'Request the current lowest, highest, and average price targets provided by various analysts'
-    }, {
-      name: '__pt!help__',
-      value: 'Display the help menu to view all available commands'
-    }]
-  });
+  _helpMessage = this._createEmbedMessage(
+    'Help Menu',
+    '#00D100',
+    this._descMsg,
+    this._msgFields
+  );
 
   /** Logger for Discord */
   _logger = new Logger('Discord');
 
+  /** The URI of the realtime service */
+  _realtimeUri;
+
   /** The welcome message to display */
-  _welcomeMessage = new MessageEmbed({
-    title: 'Welcome!',
-    color: '#00D100',
-    description: this._descriptionMessage,
-    fields: [{
-      name: 'Commands',
-      value: '`pt!rating`, `pt!help`'
-    }, {
-      name: '__pt!rating__',
-      value: 'Request the current lowest, highest, and average price targets provided by various analysts'
-    }, {
-      name: '__pt!help__',
-      value: 'Display the help menu to view all available commands'
-    }]
-  });
+  /** The message to display whenever a help command is received */
+  _helpMessage = this._createEmbedMessage(
+    'Welcome!',
+    '#00D100',
+    this._descMsg,
+    this._msgFields
+  );
 
   /**
    * @param {string} token The string token to utilize to login the Discord bot
    * @param {Client} client The client to set if provided. Should be utilized for mock purposes 
    */
-  constructor(token, client) {
+  constructor(token, realtimeUri, client) {
+    this._realtimeUri = realtimeUri;
+
     // Set the mock client for testing if provided
     if (client)
       this._client = client;
@@ -129,6 +131,24 @@ class Discord {
   }
 
   /**
+   * Helper function to create the Discord embed messages
+   * 
+   * @param {string} title The title of the messages
+   * @param {string} color The embedded color of the message
+   * @param {string} descMsg The description of the message
+   * @param {Array<EmbedFieldData>} fields The fields (body) of the message
+   * @returns {MessageEmbed} The create Discord embed message
+   */
+  _createEmbedMessage(title, color, descMsg, fields) {
+    return new MessageEmbed({
+      title: title,
+      color: color,
+      description: descMsg,
+      fields: fields
+    });
+  }
+
+  /**
    * Client messageCreate handler. We will handle the message here.
    * 
    * @param {Message} message The message caught by the messageCreate event
@@ -151,6 +171,29 @@ class Discord {
       }
       else if (command.startsWith('rating')) {
         this._logger.info('messageCreate', 'received rating command');
+        const ticker = command.replace('rating', '').trim().toUpperCase();
+        this._requestRealtimeData(ticker).then((data) => {
+          this._logger.debug('messageCreate', `successfully retrieved realtime data for ${ticker}`);
+          this._logger.debug('messageCreate', JSON.stringify(data));
+          const msg = this._createEmbedMessage(
+            `${data.ticker.companyName} (${data.ticker.symbol})`,
+            '#00D100',
+            `Current Price: \$${data.ticker.price}`,
+            [{
+              name: 'Highest Price Target',
+              value: `Current: \$${data.rating.highest}\nPrevious: \$${data.rating_history.highest}`
+            }, {
+              name: 'Lowest Price Target',
+              value: `Current: \$${data.rating.lowest}\nPrevious: \$${data.rating_history.lowest}`
+            }, {
+              name: 'Average Price Target',
+              value: `Current: \$${data.rating.average}\nPrevious: \$${data.rating_history.average}`
+            }]
+          );
+          this.sendMessage(message.channel, msg);
+        }).catch((err) => {
+          this._logger.critical('messageCreate', `error occurred requesting realtime data for ${ticker}`, err);
+        });
       }
       else {
         this._logger.warning('messageCreate', `unknown command received: ${command}`);
@@ -173,6 +216,41 @@ class Discord {
           this._logger.warning('onReady', `failed to create channel ${this._botChannel} on ready event`, err);
         });
       }
+    });
+  }
+
+  /**
+   * Helper function to request realtime data from the realtime service.
+   * 
+   * @param {string} ticker The desired ticker to request data for
+   * @returns {Promise<{
+   *  rating: {
+   *    average: number,
+   *    highest: number,
+   *    lowest: number
+   *  }, rating_history: {
+   *    average: number,
+   *    highest: number,
+   *    lowest: number
+   *  }, ticker: {
+   *    companyName: string,
+   *    price: number,
+   *    symbol: string
+   *  }} | string>} A promise which will resolve to the response from
+   * the realtime service or reject with a string
+   */
+  /* istanbul ignore next */
+  _requestRealtimeData(ticker) {
+    return new Promise((resolve, reject) => {
+      this._logger.debug('requestRealtimeData', `requesting realtime data for ${ticker}`);
+      needle.get(`${this._realtimeUri}?symbol=${ticker}`, (err, res) => {
+        if (err) {
+          reject(`error occurred querying realtime service for data on ${ticker}: ${err}`);
+        }
+        else {
+          resolve(typeof res.body === 'string' ? JSON.parse(res.body) : res.body);
+        }
+      });
     });
   }
 }

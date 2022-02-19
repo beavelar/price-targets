@@ -3,8 +3,8 @@ const { Logger } = require('../../util/logger/logger.js');
 const { RatingsServer } = require('./server/server.js');
 
 const env = new Environment({
-  'RATINGS_REQUEST_URL': 'string',
-  'RATINGS_SERVER_PORT': 'int'
+  RATINGS_REQUEST_URL: 'string',
+  RATINGS_SERVER_PORT: 'int'
 });
 
 const logger = new Logger('ratings');

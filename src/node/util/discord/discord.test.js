@@ -117,7 +117,7 @@ describe('Discord test suite', () => {
 
   test('test Discord token', () => {
     const mockClient = new MockClient();
-    const discord = new Discord('some-token', mockClient);
+    const discord = new Discord('some-token', '', mockClient);
 
     expect(discord._client.mockCallbacks.get('ready')).toBeDefined();
     expect(discord._client.mockCallbacks.get('messageCreate')).toBeDefined();
@@ -126,7 +126,7 @@ describe('Discord test suite', () => {
 
   test('test Discord no token', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
 
     expect(discord._client.mockCallbacks.get('ready')).toBeUndefined();
     expect(discord._client.mockCallbacks.get('messageCreate')).toBeUndefined();
@@ -135,7 +135,7 @@ describe('Discord test suite', () => {
 
   test('test createChannel successful', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
 
     discord.createChannel(mockClient.guild, 'create-channel-success').then((result) => {
       expect(result).toEqual('success');
@@ -144,7 +144,7 @@ describe('Discord test suite', () => {
 
   test('test createChannel unsuccessful', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
 
     discord.createChannel(mockClient.guild, 'create-channel-failed').then(() => { }).catch((err) => {
       expect(err).toEqual('failed');
@@ -153,7 +153,7 @@ describe('Discord test suite', () => {
 
   test('test sendMessage successful', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
 
     discord.sendMessage(mockClient.channel, 'message-success').then((result) => {
       expect(result.guild.id).toEqual('mock-id');
@@ -163,16 +163,22 @@ describe('Discord test suite', () => {
 
   test('test sendMessage unsuccessful', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
 
     discord.sendMessage(mockClient, 'message-failed').then(() => { }).catch((err) => {
       expect(err).toEqual('failed');
     });
   });
 
+  test('test _createEmbedMessage', () => {
+    const discord = new Discord();
+    const msg = discord._createEmbedMessage('title', '#000000', 'desc', []);
+    expect(msg).toBeDefined();
+  });
+
   test('test _messageCreate bot', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
@@ -187,7 +193,7 @@ describe('Discord test suite', () => {
 
   test('test _messageCreate no pt!', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
@@ -202,7 +208,7 @@ describe('Discord test suite', () => {
 
   test('test _messageCreate empty command', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
@@ -221,7 +227,7 @@ describe('Discord test suite', () => {
 
   test('test _messageCreate help command', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
@@ -240,7 +246,7 @@ describe('Discord test suite', () => {
 
   test('test _messageCreate help command error', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
@@ -258,12 +264,12 @@ describe('Discord test suite', () => {
 
   test('test _messageCreate rating command', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
       discord._messageCreate({
-        content: 'pt!rating',
+        content: 'pt!rating ticker',
         author: { bot: false },
         channel: mockClient.channel
       });
@@ -277,7 +283,7 @@ describe('Discord test suite', () => {
 
   test('test _messageCreate unknown command', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {
@@ -296,7 +302,7 @@ describe('Discord test suite', () => {
 
   test('test _onReady', () => {
     const mockClient = new MockClient();
-    const discord = new Discord(undefined, mockClient);
+    const discord = new Discord(undefined, '', mockClient);
     let success = true;
 
     try {

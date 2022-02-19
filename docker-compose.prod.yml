@@ -6,6 +6,7 @@ services:
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - REALTIME_SERVICE_URI=${REALTIME_SERVICE_URI}
   mongodb:
     image: mongo:latest
     volumes:
