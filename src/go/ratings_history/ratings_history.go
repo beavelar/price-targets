@@ -116,7 +116,7 @@ func getEnv() (Environment, error) {
 // Handle ratings history GET request
 func handleGETRequest(symbol string) []byte {
 	var result Rating
-	err := dbWrapper.collection.FindOne(context.Background(), bson.D{{"symbol", symbol}}).Decode(&result)
+	err := dbWrapper.collection.FindOne(context.Background(), bson.D{{Key: "symbol", Value: symbol}}).Decode(&result)
 	if err != nil {
 		return marshalErrorResponse("error occurred querying ratings_history for " + symbol + ": " + err.Error())
 	}
@@ -135,9 +135,9 @@ func handlePOSTRequest(body io.ReadCloser, symbol string) []byte {
 	}
 
 	opts := options.Update().SetUpsert(true)
-	filter := bson.D{{"symbol", symbol}}
+	filter := bson.D{{Key: "symbol", Value: symbol}}
 	data := bson.M{"average": reqData.Average, "highest": reqData.Highest, "lowest": reqData.Lowest, "symbol": symbol}
-	update := bson.D{{"$set", data}}
+	update := bson.D{{Key: "$set", Value: data}}
 	insertRes, err := dbWrapper.collection.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
 		return marshalErrorResponse(("unable to update database with received POST message for " + symbol + ": " + err.Error()))
