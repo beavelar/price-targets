@@ -60,6 +60,19 @@ services:
       - TICKER_SERVICE_URI=${TICKER_SERVICE_URI}
     volumes:
       - ./src/go/realtime:/usr/src/app/realtime
+  refresher:
+    build:
+      context: ./src
+      dockerfile: ./docker/refresher/Dockerfile.dev
+    command: go run refresher.go
+    # command: "tail -f /dev/null"
+    environment:
+      - BOT_SERVICE_URI=${BOT_SERVICE_URI}
+      - RATINGS_HISTORY_SERVICE_URI=${RATINGS_HISTORY_SERVICE_URI}
+      - REALTIME_SERVICE_URI=${REALTIME_SERVICE_URI}
+      - REFRESHER_SYMBOLS_PATH=${REFRESHER_SYMBOLS_PATH}
+    volumes:
+      - ./src/go/refresher:/usr/src/app/refresher
   ticker:
     build:
       context: ./src

@@ -3,5 +3,6 @@ go 1.17
 directory (
     ./src/go/ratings_history // ratings_history
     ./src/go/realtime // realtime
+    ./src/go/refresher // refresher
     ./src/go/ticker // ticker
 )

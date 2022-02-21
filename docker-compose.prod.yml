@@ -39,6 +39,15 @@ services:
       - RATINGS_HISTORY_SERVICE_URI=${RATINGS_HISTORY_SERVICE_URI}
       - REALTIME_SERVER_PORT=${REALTIME_SERVER_PORT}
       - TICKER_SERVICE_URI=${TICKER_SERVICE_URI}
+  refresher:
+    build:
+      context: ./src
+      dockerfile: ./docker/refresher/Dockerfile
+    environment:
+      - BOT_SERVICE_URI=${BOT_SERVICE_URI}
+      - RATINGS_HISTORY_SERVICE_URI=${RATINGS_HISTORY_SERVICE_URI}
+      - REALTIME_SERVICE_URI=${REALTIME_SERVICE_URI}
+      - REFRESHER_SYMBOLS_PATH=${REFRESHER_SYMBOLS_PATH}
   ticker:
     build:
       context: ./src

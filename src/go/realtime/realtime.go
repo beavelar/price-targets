@@ -142,9 +142,9 @@ func marshalErrorResponse(msg string) []byte {
 	return bytes
 }
 
-// Marshal ticker GET response with some logging
+// Marshal realtime GET response with some logging
 func marshalGETResponse(rating Rating, ratingHistory Rating, symbol string, ticker Ticker) []byte {
-	log.Println("marshalling GET response for ticker request " + symbol)
+	log.Println("marshalling GET response for realtime request " + symbol)
 	msgObj := &Realtime{Rating: rating, RatingHistory: ratingHistory, Ticker: ticker}
 	bytes, _ := json.Marshal(msgObj)
 	return bytes
