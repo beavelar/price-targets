@@ -170,9 +170,9 @@ describe('Discord test suite', () => {
     });
   });
 
-  test('test _createEmbedMessage', () => {
+  test('test createEmbedMessage', () => {
     const discord = new Discord();
-    const msg = discord._createEmbedMessage('title', '#000000', 'desc', []);
+    const msg = discord.createEmbedMessage('title', '#000000', 'desc', []);
     expect(msg).toBeDefined();
   });
 

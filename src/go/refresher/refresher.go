@@ -88,7 +88,6 @@ func getEnv() (Environment, error) {
 	}
 	symbols := string(contents)
 	env.symbols = strings.Split(symbols, ",")
-	log.Println(env.symbols)
 
 	return env, nil
 }

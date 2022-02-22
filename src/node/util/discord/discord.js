@@ -42,7 +42,7 @@ class Discord {
   }];
 
   /** The message to display whenever a help command is received */
-  _helpMessage = this._createEmbedMessage(
+  _helpMessage = this.createEmbedMessage(
     'Help Menu',
     '#00D100',
     this._descMsg,
@@ -57,7 +57,7 @@ class Discord {
 
   /** The welcome message to display */
   /** The message to display whenever a help command is received */
-  _helpMessage = this._createEmbedMessage(
+  _helpMessage = this.createEmbedMessage(
     'Welcome!',
     '#00D100',
     this._descMsg,
@@ -110,27 +110,6 @@ class Discord {
   }
 
   /**
-   * Helper function to send a desired message to a desired channel
-   * 
-   * @param {GuildTextBasedChannel | TextBasedChannel} channel The Discord channel to send the message to
-   * @param {MessageEmbed | string} message The desired message to send
-   * @returns {Promise<Message | string>} A promise which will resolve with a Message
-   * or reject with a message
-   */
-  sendMessage(channel, message) {
-    return new Promise((resolve, reject) => {
-      const msg = typeof message === 'string' ? message : { embeds: [message] };
-      channel.send(msg).then((response) => {
-        this._logger.info('sendMessage', `successfully sent message to ${response.guild.id}`);
-        resolve(response);
-      }).catch((err) => {
-        this._logger.critical('sendMessage', 'error occurred attempting to send message', err);
-        reject(err);
-      });
-    });
-  }
-
-  /**
    * Helper function to create the Discord embed messages
    * 
    * @param {string} title The title of the messages
@@ -139,12 +118,58 @@ class Discord {
    * @param {Array<EmbedFieldData>} fields The fields (body) of the message
    * @returns {MessageEmbed} The create Discord embed message
    */
-  _createEmbedMessage(title, color, descMsg, fields) {
+  createEmbedMessage(title, color, descMsg, fields) {
     return new MessageEmbed({
       title: title,
       color: color,
       description: descMsg,
       fields: fields
+    });
+  }
+
+  /**
+   * Helper function to send a desired message to a desired channel
+   * 
+   * @param {GuildTextBasedChannel | TextBasedChannel | undefined} channel The Discord
+   * channel to send the message to. If channel is undefined, message will be sent to all
+   * bot channels. 
+   * @param {MessageEmbed | string} message The desired message to send
+   * @returns {Promise<Message | string>} A promise which will resolve with a Message
+   * or reject with a message
+   */
+  sendMessage(channel, message) {
+    return new Promise((resolve, reject) => {
+      const msg = typeof message === 'string' ? message : { embeds: [message] };
+      const channels = new Array();
+
+      if (channel) {
+        channels.push(channel);
+      }
+      else {
+        const guilds = this._client.guilds.cache.map((guild) => {
+          return guild;
+        });
+
+        for (const guild of guilds) {
+          const channel = guild.channels.cache.find(channel => channel.name === this._botChannel);
+          channels.push(channel);
+        }
+      }
+
+      if (channels.length !== 0) {
+        for (const channel of channels) {
+          channel.send(msg).then((response) => {
+            this._logger.info('sendMessage', `successfully sent message to ${response.guild.id}`);
+            resolve(response);
+          }).catch((err) => {
+            this._logger.critical('sendMessage', 'error occurred attempting to send message', err);
+            reject(err);
+          });
+        }
+      }
+      else {
+        reject('no channels provided to send message to, ignoring request');
+      }
     });
   }
 
@@ -175,7 +200,7 @@ class Discord {
         this._requestRealtimeData(ticker).then((data) => {
           this._logger.debug('messageCreate', `successfully retrieved realtime data for ${ticker}`);
           this._logger.debug('messageCreate', JSON.stringify(data));
-          const msg = this._createEmbedMessage(
+          const msg = this.createEmbedMessage(
             `${data.ticker.companyName} (${data.ticker.symbol})`,
             '#00D100',
             `Current Price: \$${data.ticker.price}`,

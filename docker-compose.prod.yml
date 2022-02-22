@@ -4,6 +4,7 @@ services:
       context: ./src
       dockerfile: ./docker/bot/Dockerfile
     environment:
+      - BOT_SERVER_PORT=${BOT_SERVER_PORT}
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - REALTIME_SERVICE_URI=${REALTIME_SERVICE_URI}
