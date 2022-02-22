@@ -6,7 +6,8 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "discord.js": "^13.6.0"
+    "discord.js": "^13.6.0",
+    "needle": "^3.0.0"
   },
   "devDependencies": {
     "jest": "^27.4.7"
