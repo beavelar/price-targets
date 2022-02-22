@@ -2,6 +2,7 @@ FROM golang:1.16-alpine
 
 # Copy and install refresher dependencies
 COPY /go/refresher/go.mod /usr/src/app/refresher/go.mod
+COPY /go/refresher/go.sum /usr/src/app/refresher/go.sum
 RUN set -xe; \
     cd /usr/src/app/refresher; \
     go mod download;
