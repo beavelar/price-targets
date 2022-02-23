@@ -57,7 +57,7 @@ func getEnv() (Environment, error) {
 	botUri := os.Getenv("BOT_SERVICE_URI")
 	ratingsHistoryUri := os.Getenv("RATINGS_HISTORY_SERVICE_URI")
 	realtimeUri := os.Getenv("REALTIME_SERVICE_URI")
-	refresherSymbolsPath := os.Getenv("REFRESHER_SYMBOLS_PATH")
+	refresherSymbols := os.Getenv("REFRESHER_SYMBOLS")
 
 	// Check if BOT_SERVICE_URI is valid
 	if len(botUri) == 0 {
@@ -77,18 +77,11 @@ func getEnv() (Environment, error) {
 	}
 	env.realtimeUri = realtimeUri
 
-	// Check if REFRESHER_SYMBOLS_PATH is valid
-	if len(refresherSymbolsPath) == 0 {
-		return env, errors.New("no value provided for environment variable REFRESHER_SYMBOLS_PATH")
+	// Check if REFRESHER_SYMBOLS is valid
+	if len(refresherSymbols) == 0 {
+		return env, errors.New("no value provided for environment variable REFRESHER_SYMBOLS")
 	}
-
-	rawContent, err := os.ReadFile(refresherSymbolsPath)
-	if err != nil {
-		return env, errors.New("error occurred attempting to read from symbols file: " + err.Error())
-	}
-	content := string(rawContent)
-	lines := strings.Split(content, "\n")
-	env.symbols = strings.Split(lines[1], ",")
+	env.symbols = strings.Split(refresherSymbols, ",")
 
 	return env, nil
 }

@@ -13,8 +13,5 @@ RUN set -xe; \
     cd /usr/src/app/refresher; \
     go build -o refresher-exec;
 
-# Copy symbols file
-COPY /go/refresher/symbols.txt /usr/src/app/refresher/symbols.txt
-
 WORKDIR /usr/src/app/refresher
 CMD [ "./refresher-exec" ]

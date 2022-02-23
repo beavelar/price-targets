@@ -71,7 +71,7 @@ services:
       - BOT_SERVICE_URI=${BOT_SERVICE_URI}
       - RATINGS_HISTORY_SERVICE_URI=${RATINGS_HISTORY_SERVICE_URI}
       - REALTIME_SERVICE_URI=${REALTIME_SERVICE_URI}
-      - REFRESHER_SYMBOLS_PATH=${REFRESHER_SYMBOLS_PATH}
+      - REFRESHER_SYMBOLS=${REFRESHER_SYMBOLS}
     volumes:
       - ./src/go/refresher:/usr/src/app/refresher
   ticker:
