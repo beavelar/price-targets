@@ -82,12 +82,13 @@ func getEnv() (Environment, error) {
 		return env, errors.New("no value provided for environment variable REFRESHER_SYMBOLS_PATH")
 	}
 
-	contents, err := os.ReadFile(refresherSymbolsPath)
+	rawContent, err := os.ReadFile(refresherSymbolsPath)
 	if err != nil {
 		return env, errors.New("error occurred attempting to read from symbols file: " + err.Error())
 	}
-	symbols := string(contents)
-	env.symbols = strings.Split(symbols, ",")
+	content := string(rawContent)
+	lines := strings.Split(content, "\n")
+	env.symbols = strings.Split(lines[1], ",")
 
 	return env, nil
 }
