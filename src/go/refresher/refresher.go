@@ -129,25 +129,25 @@ func refresher() {
 		realtimeRes, err := http.Get(myEnv.realtimeUri + symbolParam)
 		if err != nil {
 			log.Println("error occured requesting data from realtime service: " + err.Error())
-			return
+			continue
 		}
 
 		if err = json.NewDecoder(realtimeRes.Body).Decode(&realtime); err != nil {
 			log.Println("error occured decoding response from ticker service: " + err.Error())
-			return
+			continue
 		}
 
 		if realtime.Rating.Average == realtime.RatingHistory.Average && realtime.Rating.Highest == realtime.RatingHistory.Highest && realtime.Rating.Lowest == realtime.RatingHistory.Lowest {
 			log.Println("no difference between current and previous ratings for " + symbol)
-			return
+			continue
 		}
 
 		realtimeMsg := marshalRealtimeMsg(realtime)
-		_, err = http.Post(myEnv.realtimeUri+symbolParam, "application/json", bytes.NewBuffer(realtimeMsg))
+		_, err = http.Post(myEnv.botUri, "application/json", bytes.NewBuffer(realtimeMsg))
 
 		if err != nil {
 			log.Println("error occurred with POST request to bot server: " + err.Error())
-			return
+			continue
 		}
 		log.Println("successfully updated bot service with the update for " + symbol)
 
@@ -156,7 +156,7 @@ func refresher() {
 
 		if err != nil {
 			log.Println("error occurred with POST request to ratings_history server: " + err.Error())
-			return
+			continue
 		}
 		log.Println("successfully updated ratings_history service with the update for " + symbol)
 		time.Sleep(1 * time.Second)
