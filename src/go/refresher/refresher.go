@@ -151,7 +151,7 @@ func refresher() {
 		}
 		log.Println("successfully updated bot service with the update for " + symbol)
 
-		historyMsg := marshalRatingMsg(realtime.RatingHistory)
+		historyMsg := marshalRatingMsg(realtime.Rating)
 		_, err = http.Post(myEnv.ratingsHistoryUri+symbolParam, "application/json", bytes.NewBuffer(historyMsg))
 
 		if err != nil {
