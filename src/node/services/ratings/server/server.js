@@ -81,6 +81,7 @@ class RatingsServer {
     let count = 0;
 
     for (const rating of ratings) {
+      const weight = rating.expert.avgReturn > 0 ? 1 : 0;
       if (rating.priceTarget && rating.priceTarget.value) {
         if (lowest === undefined && highest === undefined) {
           lowest = rating.priceTarget.value;
@@ -92,7 +93,7 @@ class RatingsServer {
           if (rating.priceTarget.value > highest)
             highest = rating.priceTarget.value;
         }
-        total += rating.priceTarget.value;
+        total += (weight * rating.priceTarget.value);
         count++;
       }
     }
