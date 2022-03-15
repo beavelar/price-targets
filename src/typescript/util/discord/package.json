@@ -3,14 +3,21 @@
   "version": "1.0.0",
   "description": "Wrapper to the discord.js implementation",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest --coverage"
   },
   "dependencies": {
     "discord.js": "^13.6.0",
     "needle": "^3.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.7",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/jest": "^27.4.1",
     "@types/needle": "^2.5.3",
+    "babel-jest": "^27.5.1",
+    "jest": "^27.5.1",
     "tslint": "^6.1.3",
     "typescript": "^4.6.2"
   }
