@@ -2,9 +2,9 @@
   "name": "bot",
   "version": "1.0.0",
   "description": "Implementation of the bot service",
-  "main": "main.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/services/bot/main.js"
   },
   "dependencies": {
     "express": "^4.17.2",

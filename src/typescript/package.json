@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Implementation of Price Targets services and utilities",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "startBot": "node dist/services/bot/main.js",
+    "startRatings": "node dist/services/ratings/main.js"
   },
   "dependencies": {
     "discord.js": "^13.6.0",
