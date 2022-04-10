@@ -1,3 +1,4 @@
+import { HexColorString } from 'discord.js';
 import express from 'express';
 import { Discord } from '../../../util/discord/discord';
 import { Logger } from '../../../util/logger/logger';
@@ -46,10 +47,10 @@ export class BotServer {
     this.server.post('/bot', (req, res) => {
       this.logger.debug('POST', `received POST request`);
 
-      let highestArrow = '';
-      let lowestArrow = '';
-      let averageArrow = '';
-      let embedColor = 'A9A9A9';
+      let highestArrow: string = '';
+      let lowestArrow: string = '';
+      let averageArrow: string = '';
+      let embedColor: HexColorString = '#A9A9A9';
 
       if (req.body.rating.highest > req.body.rating_history.highest)
         highestArrow = ' :arrow_up:';
