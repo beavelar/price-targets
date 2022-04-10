@@ -45,15 +45,40 @@ export class BotServer {
   private initBotRoute(): void {
     this.server.post('/bot', (req, res) => {
       this.logger.debug('POST', `received POST request`);
+
+      let highestArrow = '';
+      let lowestArrow = '';
+      let averageArrow = '';
+      let embedColor = 'A9A9A9';
+
+      if (req.body.rating.highest > req.body.rating_history.highest)
+        highestArrow = ' :arrow_up:';
+      else if (req.body.rating.highest < req.body.rating_history.highest)
+        highestArrow = ' :arrow_down:';
+
+      if (req.body.rating.lowest > req.body.rating_history.lowest)
+        lowestArrow = ' :arrow_up:';
+      else if (req.body.rating.lowest < req.body.rating_history.lowest)
+        lowestArrow = ' :arrow_down:';
+
+      if (req.body.rating.average > req.body.rating_history.average) {
+        averageArrow = ' :arrow_up:';
+        embedColor = '#00D100';
+      }
+      else if (req.body.rating.average < req.body.rating_history.average) {
+        averageArrow = ' :arrow_down:';
+        embedColor = '#FF0000';
+      }
+
       const msg = this.bot.createEmbedMessage(
         `${req.body.ticker.companyName} (${req.body.ticker.symbol})`,
-        '#00D100',
+        embedColor,
         `Current Price: \$${req.body.ticker.price}`,
         [{
-          name: 'Highest Price Target',
+          name: `Highest Price Target${highestArrow}`,
           value: `Current: \$${req.body.rating.highest}\nPrevious: \$${req.body.rating_history.highest}`
         }, {
-          name: 'Lowest Price Target',
+          name: `Lowest Price Target${lowestArrow}`,
           value: `Current: \$${req.body.rating.lowest}\nPrevious: \$${req.body.rating_history.lowest}`
         }, {
           name: 'Average Price Target',
