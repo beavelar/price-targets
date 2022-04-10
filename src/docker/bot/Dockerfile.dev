@@ -1,10 +1,10 @@
 FROM node:16.13.0
 
-# Copy overhead package.json and install dependencies
-COPY /node/package.json /usr/src/package.json
+COPY /typescript /usr/src
 RUN set -xe; \
     cd /usr/src; \
-    npm install;
+    npm install; \
+    npm run build;
 
 WORKDIR /usr/src
 CMD ["npm", "run", "startBot"]
