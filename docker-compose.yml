@@ -10,11 +10,6 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - REALTIME_SERVICE_URI=${REALTIME_SERVICE_URI}
-    volumes:
-      - ./src/node/services/bot:/usr/src/services/bot
-      - ./src/node/util/discord:/usr/src/util/discord
-      - ./src/node/util/env:/usr/src/util/env
-      - ./src/node/util/logger:/usr/src/util/logger
   mongodb:
     image: mongo:latest
     volumes:
@@ -28,10 +23,6 @@ services:
     environment:
       - RATINGS_REQUEST_URL=${RATINGS_REQUEST_URL}
       - RATINGS_SERVER_PORT=${RATINGS_SERVER_PORT}
-    volumes:
-      - ./src/node/services/ratings:/usr/src/services/ratings
-      - ./src/node/util/env:/usr/src/util/env
-      - ./src/node/util/logger:/usr/src/util/logger
   ratings_history:
     build:
       context: ./src

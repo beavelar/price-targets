@@ -1,28 +1,15 @@
 FROM node:16.13.0
 
-# Copy and install bot service files
-COPY /node/services/bot /usr/src/app/bot
+COPY /typescript/services/bot /usr/src/services/bot
+COPY /typescript/util/discord /usr/src/util/discord
+COPY /typescript/util/env /usr/src/util/env
+COPY /typescript/util/logger /usr/src/util/logger
+COPY /typescript/package.json /usr/src/package.json
+COPY /typescript/tsconfig.json /usr/src/tsconfig.json
 RUN set -xe; \
-    cd /usr/src/app/bot; \
-    npm install;
+    cd /usr/src; \
+    npm install ; \
+    npm run build;
 
-# Copy and install discord utility files
-COPY /node/util/discord /usr/src/util/discord
-RUN set -xe; \
-    cd /usr/src/util/discord; \
-    npm install;
-
-# Copy and install env utility files
-COPY /node/util/env /usr/src/util/env
-RUN set -xe; \
-    cd /usr/src/util/env; \
-    npm install;
-
-# Copy and install logger utility files
-COPY /node/util/logger /usr/src/util/logger
-RUN set -xe; \
-    cd /usr/src/util/logger; \
-    npm install;
-
-WORKDIR /usr/src/app/bot
-CMD ["npm", "start"]
+WORKDIR /usr/src
+CMD ["npm", "run", "startBot"]

@@ -1,22 +1,14 @@
 FROM node:16.13.0
 
-# Copy and install ratings service files
-COPY /node/services/ratings /usr/src/app/ratings
+COPY /typescript/services/ratings /usr/src/services/ratings
+COPY /typescript/util/env /usr/src/util/env
+COPY /typescript/util/logger /usr/src/util/logger
+COPY /typescript/package.json /usr/src/package.json
+COPY /typescript/tsconfig.json /usr/src/tsconfig.json
 RUN set -xe; \
-    cd /usr/src/app/ratings; \
-    npm install;
+    cd /usr/src; \
+    npm install; \
+    npm run build;
 
-# Copy and install env utility files
-COPY /node/util/env /usr/src/util/env
-RUN set -xe; \
-    cd /usr/src/util/env; \
-    npm install;
-
-# Copy and install logger utility files
-COPY /node/util/logger /usr/src/util/logger
-RUN set -xe; \
-    cd /usr/src/util/logger; \
-    npm install;
-
-WORKDIR /usr/src/app/ratings
-CMD ["npm", "start"]
+WORKDIR /usr/src
+CMD ["npm", "run", "startRatings"]
