@@ -97,13 +97,13 @@ func main() {
 	myEnv = env
 	log.Println("setting up and starting refresher cron job")
 
-	// Set local timezone to UTC
-	utc := time.FixedZone("UTC", 0)
+	// Set local timezone to MDT
+	utc := time.FixedZone("MDT", 0)
 	time.Local = utc
 
-	// Create and run job Mon-Fri at 7AM MST, 2PM UTC
+	// Create and run job Mon-Fri at 7AM MDT
 	job := cron.New()
-	job.AddFunc("0 14 * * 1-5", refresher)
+	job.AddFunc("0 7 * * 1-5", refresher)
 	job.Run()
 }
 
