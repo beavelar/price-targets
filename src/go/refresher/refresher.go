@@ -123,42 +123,44 @@ func marshalRealtimeMsg(msg Realtime) []byte {
 func refresher() {
 	log.Println("running refresher cron job")
 	for _, symbol := range myEnv.symbols {
-		symbolParam := "?symbol=" + symbol
+		go func(symbol string) {
+			symbolParam := "?symbol=" + symbol
 
-		var realtime Realtime
-		realtimeRes, err := http.Get(myEnv.realtimeUri + symbolParam)
-		if err != nil {
-			log.Println("error occured requesting data from realtime service: " + err.Error())
-			continue
-		}
+			var realtime Realtime
+			realtimeRes, err := http.Get(myEnv.realtimeUri + symbolParam)
+			if err != nil {
+				log.Println("error occured requesting data from realtime service: " + err.Error())
+				return
+			}
 
-		if err = json.NewDecoder(realtimeRes.Body).Decode(&realtime); err != nil {
-			log.Println("error occured decoding response from ticker service: " + err.Error())
-			continue
-		}
+			if err = json.NewDecoder(realtimeRes.Body).Decode(&realtime); err != nil {
+				log.Println("error occured decoding response from ticker service: " + err.Error())
+				return
+			}
 
-		if realtime.Rating.Average == realtime.RatingHistory.Average && realtime.Rating.Highest == realtime.RatingHistory.Highest && realtime.Rating.Lowest == realtime.RatingHistory.Lowest {
-			log.Println("no difference between current and previous ratings for " + symbol)
-			continue
-		}
+			if realtime.Rating.Average == realtime.RatingHistory.Average && realtime.Rating.Highest == realtime.RatingHistory.Highest && realtime.Rating.Lowest == realtime.RatingHistory.Lowest {
+				log.Println("no difference between current and previous ratings for " + symbol)
+				return
+			}
 
-		realtimeMsg := marshalRealtimeMsg(realtime)
-		_, err = http.Post(myEnv.botUri, "application/json", bytes.NewBuffer(realtimeMsg))
+			realtimeMsg := marshalRealtimeMsg(realtime)
+			_, err = http.Post(myEnv.botUri, "application/json", bytes.NewBuffer(realtimeMsg))
 
-		if err != nil {
-			log.Println("error occurred with POST request to bot server: " + err.Error())
-			continue
-		}
-		log.Println("successfully updated bot service with the update for " + symbol)
+			if err != nil {
+				log.Println("error occurred with POST request to bot server: " + err.Error())
+				return
+			}
+			log.Println("successfully updated bot service with the update for " + symbol)
 
-		historyMsg := marshalRatingMsg(realtime.Rating)
-		_, err = http.Post(myEnv.ratingsHistoryUri+symbolParam, "application/json", bytes.NewBuffer(historyMsg))
+			historyMsg := marshalRatingMsg(realtime.Rating)
+			_, err = http.Post(myEnv.ratingsHistoryUri+symbolParam, "application/json", bytes.NewBuffer(historyMsg))
 
-		if err != nil {
-			log.Println("error occurred with POST request to ratings_history server: " + err.Error())
-			continue
-		}
-		log.Println("successfully updated ratings_history service with the update for " + symbol)
+			if err != nil {
+				log.Println("error occurred with POST request to ratings_history server: " + err.Error())
+				return
+			}
+			log.Println("successfully updated ratings_history service with the update for " + symbol)
+		}(symbol)
 		time.Sleep(1 * time.Second)
 	}
 }
